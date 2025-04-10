@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page non disponible</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            background-color: white;
+            border-radius: 10px;
+            padding: 40px 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            color: #6c757d;
+        }
+        
+        h1 {
+            font-size: 32px;
+            color: #343a40;
+            margin-bottom: 20px;
+        }
+        
+        p {
+            font-size: 18px;
+            color: #6c757d;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        .loader {
+            display: inline-block;
+            width: 80px;
+            height: 80px;
+            margin-top: 20px;
+        }
+        
+        .loader:after {
+            content: " ";
+            display: block;
+            width: 64px;
+            height: 64px;
+            margin: 8px;
+            border-radius: 50%;
+            border: 6px solid #007bff;
+            border-color: #007bff transparent #007bff transparent;
+            animation: loader 1.2s linear infinite;
+        }
+        
+        @keyframes loader {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .footer {
+            margin-top: 40px;
+            font-size: 14px;
+            color: #adb5bd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">&#9888;</div>
+        <h1>Page non disponible</h1>
+        <p>Nous sommes désolés, mais la page que vous recherchez n'est pas disponible pour le moment. Veuillez patienter dans les jours à venir.</p>
+        <p>Notre équipe travaille activement pour rendre ce contenu accessible le plus rapidement possible.</p>
+        <div class="loader"></div>
+        <div class="footer">
+            Merci de votre compréhension et de votre patience.
+        </div>
+    </div>
+</body>
+</html>

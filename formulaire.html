@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eden Service - Liste des soumissions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f8fb;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #2c5282;
+            margin-bottom: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            background-color: #4299e1;
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+        }
+        .back-link:hover {
+            background-color: #3182ce;
+        }
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Liste des soumissions - Eden Service</h1>
+        
+        <div id="submissionsContainer">
+            <table id="submissionsTable">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Prénom</th>
+                        <th>Contact</th>
+                        <th>Produit</th>
+                        <th>Quantité</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="submissionsBody">
+                    <!-- Les données seront insérées ici dynamiquement -->
+                </tbody>
+            </table>
+            <div id="noData" class="no-data hidden">
+                Aucune soumission trouvée
+            </div>
+        </div>
+        
+        <a href="marcio.html" class="back-link">Retour au formulaire</a>
+    </div>
+
+    <!-- Scripts Firebase -->
+    <script type="module">
+        // Import des fonctions Firebase
+        import { initializeApp } from "https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-database.js";
+
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBSPNvZqwX31r2b9GqyyxTmfjXGpNmAvzI",
+            authDomain: "marcius-82e4c.firebaseapp.com",
+            databaseURL: "https://marcius-82e4c-default-rtdb.firebaseio.com",
+            projectId: "marcius-82e4c",
+            storageBucket: "marcius-82e4c.firebasestorage.app",
+            messagingSenderId: "345743987757",
+            appId: "1:345743987757:web:cb6941f795ff99ad8e54a4",
+            measurementId: "G-K6S4BKPR10"
+        };
+
+        // Initialisation de Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const formSubmissionsRef = ref(database, 'formSubmissions');
+
+        // Éléments du DOM
+        const submissionsBody = document.getElementById('submissionsBody');
+        const noData = document.getElementById('noData');
+
+        // Formater la date
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+        }
+
+        // Récupérer et afficher les soumissions existantes
+        onValue(formSubmissionsRef, (snapshot) => {
+            // Effacer le tableau actuel
+            submissionsBody.innerHTML = '';
+            
+            let hasData = false;
+            
+            // Ajouter toutes les soumissions au tableau
+            snapshot.forEach((childSnapshot) => {
+                hasData = true;
+                const submission = childSnapshot.val();
+                
+                // Créer une ligne de tableau pour chaque soumission
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${submission.nom}</td>
+                    <td>${submission.prenom}</td>
+                    <td>${submission.contact}</td>
+                    <td>${submission.produit}</td>
+                    <td>${submission.quantite}</td>
+                    <td>${formatDate(submission.timestamp)}</td>
+                `;
+                
+                submissionsBody.appendChild(row);
+            });
+            
+            // Afficher un message si aucune donnée
+            if (hasData) {
+                noData.classList.add('hidden');
+            } else {
+                noData.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

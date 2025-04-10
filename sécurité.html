@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Accès sécurisé</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #4e54c8, #8f94fb);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+    }
+
+    .container {
+      text-align: center;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 40px 20px;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      width: 90%;
+      max-width: 400px;
+    }
+
+    h1 {
+      margin-bottom: 30px;
+      font-size: 1.8em;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      margin: 15px 0;
+      padding: 15px;
+      background-color: #ffffff;
+      color: #4e54c8;
+      border: none;
+      border-radius: 30px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #4e54c8;
+      color: #fff;
+      transform: scale(1.02);
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 30px 15px;
+      }
+
+      h1 {
+        font-size: 1.5em;
+      }
+
+      .btn {
+        font-size: 15px;
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Choisissez une destination</h1>
+    <button class="btn" onclick="verifierMotDePasse('fournisseur.html')">Fournisseur</button>
+    <button class="btn" onclick="verifierMotDePasse('formulaire.html')">Formulaire</button>
+  </div>
+
+  <script>
+    function verifierMotDePasse(page) {
+      const motDePasse = prompt("Entrez le mot de passe pour accéder à cette page :");
+      if (motDePasse === "marcio@2003") {
+        window.location.href = page;
+      } else if (motDePasse !== null) {
+        alert("Mot de passe incorrect.");
+      }
+    }
+  </script>
+</body>
+</html>

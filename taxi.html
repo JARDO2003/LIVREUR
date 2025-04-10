@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eden Taxi Moto - Client</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-database-compat.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .header {
+            background-color: #222;
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .chatbot {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 15px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        .bot-message {
+            background-color: #f1f0f0;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+        .user-message {
+            background-color: #0084ff;
+            color: white;
+            align-self: flex-end;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+        .message-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .option-button {
+            background-color: #f1f0f0;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;  /* Increased font weight for better visibility */
+            text-align: left;
+            transition: background-color 0.3s;
+            font-size: 16px;   /* Increased font size */
+            animation: pulse 1.5s infinite;  /* Pulsing animation */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border: 2px solid transparent;
+        }
+        .option-button:hover {
+            background-color: #e0e0e0;
+            animation: none;
+            border-color: #0084ff;
+        }
+        
+        /* Pulsing animation */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            }
+            50% {
+                transform: scale(1.03);
+                box-shadow: 0 5px 15px rgba(0,0,150,0.2);
+                background-color: #e8f1ff;
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            }
+        }
+        
+        .input-group {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            outline: none;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #0084ff;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background-color: #0073e6;
+            transform: translateY(-2px);
+        }
+        
+        /* Special button for location sharing */
+        .location-button {
+            background-color: #28a745;
+            color: white;
+            animation: locationPulse 2s infinite;
+        }
+        
+        @keyframes locationPulse {
+            0% {
+                background-color: #28a745;
+            }
+            50% {
+                background-color: #1e7e34;
+                box-shadow: 0 0 15px rgba(40, 167, 69, 0.5);
+            }
+            100% {
+                background-color: #28a745;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Eden Taxi Moto</h1>
+    </div>
+    
+    <div class="container">
+        <div class="chatbot">
+            <div class="chat-messages" id="chat-messages-client">
+                <!-- Messages will be added here dynamically -->
+            </div>
+            <div class="input-group">
+                <input type="text" id="user-input" placeholder="Tapez votre message..." disabled>
+                <button onclick="sendMessage()" id="send-button" disabled>Envoyer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBSPNvZqwX31r2b9GqyyxTmfjXGpNmAvzI",
+            authDomain: "marcius-82e4c.firebaseapp.com",
+            databaseURL: "https://marcius-82e4c-default-rtdb.firebaseio.com",
+            projectId: "marcius-82e4c",
+            storageBucket: "marcius-82e4c.firebasestorage.app",
+            messagingSenderId: "345743987757",
+            appId: "1:345743987757:web:cb6941f795ff99ad8e54a4",
+            measurementId: "G-K6S4BKPR10"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Chat state
+        let chatState = {
+            step: 'welcome',
+            customerPhone: null,
+            customerLocation: null,
+            requestId: null
+        };
+
+        // DOM elements
+        const chatMessagesClient = document.getElementById('chat-messages-client');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+
+        // Initialize chatbot when page loads
+        window.onload = function() {
+            startChat();
+        };
+
+        function startChat() {
+            addBotMessage("👋 Bienvenue chez Eden Taxi Moto ! Comment puis-je vous aider aujourd'hui ?");
+            
+            // Add options with a slight delay for better UX
+            setTimeout(() => {
+                // Add options
+                const optionsDiv = document.createElement('div');
+                optionsDiv.className = 'message-options';
+                
+                const orderButton = document.createElement('button');
+                orderButton.className = 'option-button';
+                orderButton.textContent = "🏍️ Commander un taxi moto";
+                orderButton.onclick = function() {
+                    handleOption('order');
+                };
+                
+                const contactButton = document.createElement('button');
+                contactButton.className = 'option-button';
+                contactButton.textContent = "📞 Joindre Eden Service";
+                contactButton.onclick = function() {
+                    handleOption('contact');
+                };
+                
+                optionsDiv.appendChild(orderButton);
+                optionsDiv.appendChild(contactButton);
+                chatMessagesClient.appendChild(optionsDiv);
+                
+                // Scroll to the bottom to show the options
+                chatMessagesClient.scrollTop = chatMessagesClient.scrollHeight;
+            }, 500);
+        }
+
+        function handleOption(option) {
+            // Remove previous options
+            const previousOptions = document.querySelectorAll('.message-options');
+            previousOptions.forEach(element => {
+                element.remove();
+            });
+
+            if (option === 'order') {
+                addUserMessage("Je souhaite commander un taxi moto");
+                chatState.step = 'askPhone';
+                addBotMessage("Excellent ! Pour traiter votre demande, pourriez-vous me communiquer votre numéro de téléphone ?");
+                userInput.disabled = false;
+                sendButton.disabled = false;
+                userInput.focus();
+            } else if (option === 'contact') {
+                addUserMessage("Je souhaite joindre Eden Service");
+                addBotMessage("Vous pouvez joindre notre service client au 01 23 45 67 89 ou par email à contact@eden-taxi-moto.com");
+            } else if (option === 'shareLocation') {
+                addUserMessage("Partager ma localisation");
+                getLocation();
+            }
+        }
+
+        function sendMessage() {
+            const message = userInput.value.trim();
+            if (message === '') return;
+
+            addUserMessage(message);
+            userInput.value = '';
+
+            processUserInput(message);
+        }
+
+        function processUserInput(message) {
+            if (chatState.step === 'askPhone') {
+                // Validate phone number (simple validation for demo)
+                if (message.length >= 8 && !isNaN(message)) {
+                    chatState.customerPhone = message;
+                    addBotMessage("Merci ! Pour vous envoyer un taxi, nous avons besoin de connaître votre position.");
+                    
+                    // Add location sharing option with a slight delay
+                    setTimeout(() => {
+                        // Add location sharing option
+                        const optionsDiv = document.createElement('div');
+                        optionsDiv.className = 'message-options';
+                        
+                        const locationButton = document.createElement('button');
+                        locationButton.className = 'option-button location-button';
+                        locationButton.textContent = "📍 Partager ma localisation";
+                        locationButton.onclick = function() {
+                            handleOption('shareLocation');
+                        };
+                        
+                        optionsDiv.appendChild(locationButton);
+                        chatMessagesClient.appendChild(optionsDiv);
+                        
+                        // Scroll to the bottom to show the location button
+                        chatMessagesClient.scrollTop = chatMessagesClient.scrollHeight;
+                    }, 500);
+                    
+                    chatState.step = 'askLocation';
+                    userInput.disabled = true;
+                    sendButton.disabled = true;
+                } else {
+                    addBotMessage("Ce numéro ne semble pas valide. Veuillez entrer un numéro de téléphone valide.");
+                }
+            }
+        }
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                addBotMessage("Récupération de votre position en cours...");
+                navigator.geolocation.getCurrentPosition(showPosition, showError);
+            } else {
+                addBotMessage("La géolocalisation n'est pas prise en charge par votre navigateur.");
+            }
+        }
+
+        function showPosition(position) {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+            
+            chatState.customerLocation = {
+                latitude: latitude,
+                longitude: longitude,
+                timestamp: new Date().getTime()
+            };
+            
+            // Generate a unique request ID
+            chatState.requestId = 'request_' + new Date().getTime();
+            
+            // Save to Firebase
+            database.ref('requests/' + chatState.requestId).set({
+                phone: chatState.customerPhone,
+                location: chatState.customerLocation,
+                status: 'pending',
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+            
+            addBotMessage("✅ Merci pour votre confiance ! Nous vous enverrons un taxi dans quelques minutes. Un chauffeur vous contactera au " + chatState.customerPhone + ".");
+            
+            // Listen for updates
+            database.ref('requests/' + chatState.requestId).on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data && data.status === 'accepted') {
+                    addBotMessage("🏍️ Bonne nouvelle ! Un chauffeur a accepté votre course et sera chez vous dans environ " + data.estimatedTime + " minutes.");
+                }
+            });
+        }
+
+        function showError(error) {
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    addBotMessage("Vous avez refusé la demande de géolocalisation.");
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    addBotMessage("Les informations de localisation ne sont pas disponibles.");
+                    break;
+                case error.TIMEOUT:
+                    addBotMessage("La demande de localisation a expiré.");
+                    break;
+                case error.UNKNOWN_ERROR:
+                    addBotMessage("Une erreur inconnue s'est produite.");
+                    break;
+            }
+        }
+
+        function addBotMessage(message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message bot-message';
+            messageDiv.textContent = message;
+            chatMessagesClient.appendChild(messageDiv);
+            chatMessagesClient.scrollTop = chatMessagesClient.scrollHeight;
+        }
+
+        function addUserMessage(message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message user-message';
+            messageDiv.textContent = message;
+            chatMessagesClient.appendChild(messageDiv);
+            chatMessagesClient.scrollTop = chatMessagesClient.scrollHeight;
+        }
+
+        // Event listener for Enter key in input field
+        userInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
