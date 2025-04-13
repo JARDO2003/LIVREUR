@@ -3,1056 +3,844 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nos Services Professionnels</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Eden Taxi Moto</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-database-compat.min.js"></script>
+    <!-- Ajout des ressources Leaflet -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <style>
-        :root {
-            --primary-color: #1a2942;
-            --secondary-color: #0077cc;
-            --accent-color: #ff6b35;
-            --light-color: #f8f9fa;
-            --dark-color: #121e2d;
-            --text-color: #333;
-            --text-light: #6c757d;
-            --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            --transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-        }
-
-        * {
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            font-family: 'Montserrat', 'Segoe UI', sans-serif;
-        }
-
-        body {
-            background-color: #f2f5f9;
-            color: var(--text-color);
-            line-height: 1.7;
-            overflow-x: hidden;
-        }
-
-        .container {
-            max-width: 1300px;
-            margin: 0 auto;
-            padding: 0 30px;
-        }
-
-        /* Header styles */
-        header {
-            background-color: var(--dark-color);
-            color: white;
-            padding: 2rem 0;
-            position: relative;
-            z-index: 100;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .logo {
-            font-size: 2.8rem;
-            font-weight: 800;
-            letter-spacing: -1px;
-            background: linear-gradient(135deg, #ffffff, #b3d9ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 0.5rem;
-        }
-
-        /* Navigation */
-        nav {
-            background-color: rgba(255, 255, 255, 0.95);
-            padding: 1.2rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            transition: var(--transition);
-        }
-
-        nav.scrolled {
-            padding: 0.8rem 0;
-            background-color: rgba(255, 255, 255, 0.98);
-        }
-
-        nav ul {
-            display: flex;
-            justify-content: center;
-            list-style: none;
-            gap: 3rem;
-        }
-
-        nav ul li a {
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 1.05rem;
-            position: relative;
-            padding: 0.5rem 0;
-            transition: var(--transition);
-        }
-
-        nav ul li a::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background-color: var(--secondary-color);
-            transition: var(--transition);
-        }
-
-        nav ul li a:hover {
-            color: var(--secondary-color);
-        }
-
-        nav ul li a:hover::after {
-            width: 100%;
-        }
-
-        /* Hero Section with Slideshow */
-        .hero {
-            position: relative;
-            height: 80vh;
-            min-height: 500px;
-            color: white;
-            overflow: hidden;
-        }
-
-        .slide {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            transition: opacity 1s ease;
+            background-color: #f5f5f5;
+            color: #333;
+            background-image: url('image/taxi moto.jpg');
             background-size: cover;
             background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+        }
+        
+        .header {
+            background-color: #222;
+            color: white;
+            padding: 12px 0;
+            text-align: center;
+            position: relative;
+        }
+        
+        .nav-menu {
+            display: flex;
+            justify-content: center;
+            background-color: #333;
+            padding: 10px 0;
+        }
+        
+        .nav-button {
+            background-color: #555;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            margin: 0 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .nav-button:hover {
+            background-color: #777;
+            transform: translateY(-2px);
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        
+        .section {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            color: #0084ff;
+            border-bottom: 2px solid #423b3b;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        
+        /* ChatBot Section */
+        .chatbot {
+            border: 1px solid #ebe8e8;
+            border-radius: 10px;
+            padding: 15px;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-header {
             display: flex;
             align-items: center;
-            justify-content: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f0eded;
         }
 
-        .slide.active {
-            opacity: 1;
+        .chatbot-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 15px;
+            object-fit: cover;
         }
 
-        .slide-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
+        .chatbot-info {
+            flex: 1;
+        }
+
+        .chatbot-name {
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .chatbot-status {
+            color: #28a745;
+            font-size: 0.9em;
+            margin: 0;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 15px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        
+        .bot-message {
+            background-color: #f1f0f0;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .user-message {
+            background-color: #0084ff;
+            color: white;
+            align-self: flex-end;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .order-button {
+            background-color: #ff6b00;
+            padding: 12px 20px;
+            font-size: 18px;
             width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(26, 41, 66, 0.9), rgba(0, 0, 0, 0.7));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            animation: orderPulse 2s infinite;
+            transition: all 0.3s;
         }
-
-        .slide-content {
-            position: relative;
-            z-index: 10;
-            text-align: center;
-            max-width: 800px;
-            padding: 0 30px;
+        
+        .order-button:hover {
+            background-color: #e65c00;
+            transform: translateY(-2px);
         }
-
-        .hero h2 {
-            font-size: 3.2rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeInUp 1s forwards 0.5s;
-        }
-
-        .hero p {
-            font-size: 1.3rem;
-            max-width: 700px;
-            margin: 0 auto 2.5rem;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeInUp 1s forwards 0.8s;
-        }
-
-        @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
+        
+        @keyframes orderPulse {
+            0% {
+                background-color: #ff6b00;
+            }
+            50% {
+                background-color: #e65c00;
+                box-shadow: 0 0 15px rgba(255, 107, 0, 0.5);
+            }
+            100% {
+                background-color: #ff6b00;
             }
         }
-
-        .slide-indicators {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 15px;
-            z-index: 20;
-        }
-
-        .slide-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.5);
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .slide-indicator.active {
-            background-color: var(--secondary-color);
-            transform: scale(1.2);
-        }
-
-        /* Button Styles */
-        .btn {
-            display: inline-block;
-            background-color: var(--secondary-color);
-            color: white;
-            padding: 14px 34px;
-            border: none;
-            border-radius: 4px;
-            font-size: 1.05rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: var(--transition);
-            box-shadow: 0 5px 15px rgba(0, 119, 204, 0.3);
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeInUp 1s forwards 1.1s;
-        }
-
-        .btn:before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 0;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.2);
-            transition: var(--transition);
-            z-index: -1;
-        }
-
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 119, 204, 0.4);
-        }
-
-        .btn:hover:before {
-            width: 100%;
-        }
-
+        
         /* Services Section */
-        .services {
-            padding: 8rem 0;
-            position: relative;
-        }
-
-        .section-header {
-            text-align: center;
-            margin-bottom: 5rem;
-            position: relative;
-        }
-
-        .section-header h2 {
-            font-size: 2.6rem;
-            color: var(--dark-color);
-            position: relative;
-            display: inline-block;
-            margin-bottom: 1.2rem;
-            font-weight: 700;
-        }
-
-        .section-header h2::after {
-            content: '';
-            position: absolute;
-            left: 50%;
-            bottom: -15px;
-            transform: translateX(-50%);
-            width: 80px;
-            height: 4px;
-            background: linear-gradient(to right, var(--secondary-color), var(--accent-color));
-            border-radius: 2px;
-        }
-
-        .section-header p {
-            font-size: 1.1rem;
-            color: var(--text-light);
-            max-width: 600px;
-            margin: 1rem auto 0;
-        }
-
         .services-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 40px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
         }
-
+        
         .service-card {
-            background-color: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: var(--box-shadow);
-            transition: var(--transition);
-            position: relative;
-            z-index: 1;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+            border: 1px solid #eee;
         }
-
+        
         .service-card:hover {
-            transform: translateY(-15px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
-
-        .service-img {
-            height: 250px;
-            overflow: hidden;
-            position: relative;
+        
+        .service-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+            color: #0084ff;
         }
-
-        .service-img::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 30%;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
-        }
-
-        .service-img img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.8s ease;
-        }
-
-        .service-card:hover .service-img img {
-            transform: scale(1.1);
-        }
-
-        .service-content {
-            padding: 2.5rem;
-            position: relative;
-        }
-
-        .service-content h3 {
-            font-size: 1.8rem;
-            margin-bottom: 1.2rem;
-            color: var(--primary-color);
-            font-weight: 700;
-        }
-
-        .service-content p {
-            margin-bottom: 2rem;
-            color: var(--text-light);
-            font-size: 1.05rem;
-        }
-
-        .service-card .btn {
-            padding: 12px 28px;
-            background-color: var(--primary-color);
-        }
-
-        .service-card .btn:hover {
-            background-color: var(--secondary-color);
-        }
-
-        /* Testimonials */
-        .testimonials {
-            background-color: var(--light-color);
-            padding: 8rem 0;
-            position: relative;
-        }
-
-        .testimonials::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url('/api/placeholder/1500/800') center/cover no-repeat;
-            opacity: 0.05;
-        }
-
-        .testimonial-card {
-            background-color: white;
-            padding: 3rem;
+        
+        /* Map Section */
+        .map-container {
+            height: 400px;
             border-radius: 10px;
-            box-shadow: var(--box-shadow);
-            text-align: center;
-            position: relative;
-            z-index: 1;
-            transition: var(--transition);
-        }
-
-        .testimonial-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-        }
-
-        .testimonial-card::before {
-            content: '"';
-            position: absolute;
-            top: 20px;
-            left: 30px;
-            font-size: 5rem;
-            color: rgba(0, 119, 204, 0.1);
-            font-family: serif;
-            line-height: 1;
-            z-index: -1;
-        }
-
-        .testimonial-card p {
-            font-size: 1.1rem;
-            font-style: italic;
-            margin-bottom: 2rem;
-            color: var(--text-color);
-            position: relative;
-            z-index: 1;
-        }
-
-        .testimonial-card .name {
-            font-weight: 700;
-            color: var(--primary-color);
-            font-size: 1.1rem;
-            margin-top: 0.5rem;
-        }
-
-        /* CTA Section */
-        .cta {
-            background: linear-gradient(135deg, var(--primary-color), var(--dark-color));
-            color: white;
-            text-align: center;
-            padding: 7rem 0;
-            position: relative;
             overflow: hidden;
+            position: relative;
         }
-
-        .cta::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
+        
+        #map {
             width: 100%;
             height: 100%;
-            background: url('/api/placeholder/1500/800') center/cover no-repeat;
-            opacity: 0.1;
-            z-index: 0;
         }
-
-        .cta .container {
-            position: relative;
-            z-index: 1;
+        
+        .map-placeholder {
+            width: 100%;
+            height: 100%;
+            background-color: #e9e9e9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            color: #777;
         }
-
-        .cta h2 {
-            font-size: 2.8rem;
-            margin-bottom: 1.8rem;
-            font-weight: 700;
-        }
-
-        .cta p {
-            max-width: 700px;
-            margin: 0 auto 2.5rem;
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
-
-        .cta .btn {
-            background-color: var(--accent-color);
-            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
-        }
-
-        .cta .btn:hover {
-            background-color: var(--secondary-color);
-            box-shadow: 0 8px 25px rgba(0, 119, 204, 0.4);
-        }
-
-        /* Footer */
-        footer {
-            background-color: var(--dark-color);
-            color: white;
-            padding: 5rem 0 2rem;
-            position: relative;
-        }
-
-        .footer-content {
+        
+        /* Testimonials Section */
+        .testimonials {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 40px;
-            margin-bottom: 3rem;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
         }
-
-        .footer-section h3 {
-            margin-bottom: 1.5rem;
-            font-size: 1.4rem;
-            color: white;
-            position: relative;
-            padding-bottom: 0.8rem;
+        
+        .testimonial-card {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            border-left: 4px solid #0084ff;
+        }
+        
+        .testimonial-text {
+            font-style: italic;
+            margin-bottom: 10px;
+        }
+        
+        .testimonial-author {
+            font-weight: bold;
+            text-align: right;
+        }
+        
+        /* Registration Form */
+        #registration-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .form-group label {
             font-weight: 600;
         }
-
-        .footer-section h3::after {
-            content: '';
-            position: absolute;
+        
+        input[type="text"], 
+        input[type="tel"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .form-button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .form-button:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 999;
             left: 0;
-            bottom: 0;
-            width: 50px;
-            height: 3px;
-            background-color: var(--secondary-color);
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
         }
-
-        .footer-section p {
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 1rem;
-            font-size: 0.95rem;
+        
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 500px;
         }
-
-        .footer-section ul {
-            list-style: none;
+        
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
         }
-
-        .footer-section ul li {
-            margin-bottom: 0.8rem;
+        
+        .close-button:hover {
+            color: #000;
         }
-
-        .footer-section ul li a {
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            transition: var(--transition);
-            display: inline-block;
-            font-size: 0.95rem;
-        }
-
-        .footer-section ul li a:hover {
-            color: var(--secondary-color);
-            transform: translateX(5px);
-        }
-
-        .footer-section .contact-info {
-            display: flex;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .footer-section .contact-info i {
-            width: 30px;
-            color: var(--secondary-color);
-        }
-
-        .footer-bottom {
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding-top: 2rem;
+        
+        /* Footer */
+        .footer {
+            background-color: #222;
+            color: white;
             text-align: center;
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.6);
-        }
-
-        /* Responsive Design */
-        @media (max-width: 992px) {
-            .hero h2 {
-                font-size: 2.8rem;
-            }
-            
-            .services-grid {
-                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            }
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 0 20px;
-            }
-            
-            nav ul {
-                flex-direction: column;
-                align-items: center;
-                gap: 1.5rem;
-            }
-            
-            .hero {
-                height: 70vh;
-            }
-            
-            .hero h2 {
-                font-size: 2.2rem;
-            }
-            
-            .hero p {
-                font-size: 1.1rem;
-            }
-            
-            .section-header h2 {
-                font-size: 2.2rem;
-            }
-            
-            .cta h2 {
-                font-size: 2.2rem;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .logo {
-                font-size: 2.2rem;
-            }
-            
-            .hero h2 {
-                font-size: 1.8rem;
-            }
-            
-            .hero p {
-                font-size: 1rem;
-            }
-            
-            .service-content {
-                padding: 1.8rem;
-            }
-            
-            .testimonial-card {
-                padding: 2rem;
-            }
+            padding: 20px 0;
+            margin-top: 40px;
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="container">
-            <div class="logo">ServicePro</div>
-            <p>Solutions professionnelles pour votre entreprise</p>
-        </div>
-    </header>
+    <!-- Header -->
+    <div class="header">
+        <h1>Eden Taxi Moto</h1>
+    </div>
     
-    <nav id="navbar">
-        <div class="container">
-            <ul>
-                <li><a href="#accueil">Accueil</a></li>
-                <li><a href="#services">Nos Services</a></li>
-                <li><a href="#about">À Propos</a></li>
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-        </div>
-    </nav>
+    <!-- Navigation Menu -->
+    <div class="nav-menu">
+        <button class="nav-button" onclick="showSection('home')">Accueil</button>
+        <button class="nav-button" onclick="showModal('about-modal')">À propos</button>
+        <button class="nav-button" onclick="showModal('contact-modal')">Contact</button>
+    </div>
     
-    <section id="accueil" class="hero">
-        <div class="slide active" style="background-image: url('image/livraison.jpg');">
-            <div class="slide-overlay"></div>
-            <div class="slide-content">
-                <h2>Des Services Innovants pour Propulser Votre Entreprise</h2>
-                <p>Découvrez notre gamme complète de services professionnels conçus pour répondre à tous vos besoins commerciaux.</p>
-                <a href="#services" class="btn">Découvrir Nos Services</a>
+    <div class="container">
+        <!-- Registration Section -->
+        <div class="section" id="registration-section">
+            <h2 class="section-title">Inscription</h2>
+            <form id="registration-form">
+                <div class="form-group">
+                    <label for="user-name">Nom</label>
+                    <input type="text" id="user-name" placeholder="Votre nom" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="user-firstname">Prénom</label>
+                    <input type="text" id="user-firstname" placeholder="Votre prénom" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="user-phone">Numéro de téléphone</label>
+                    <input type="tel" id="user-phone" placeholder="Votre numéro de téléphone" required>
+                </div>
+                
+                <div class="form-group">
+                    <button type="button" id="location-button" class="form-button">Activer la localisation</button>
+                    <span id="location-status">Localisation: Non activée</span>
+                </div>
+                
+                <button type="button" id="register-button" class="form-button" disabled>S'inscrire</button>
+            </form>
+        </div>
+        
+        <!-- ChatBot Section -->
+        <div class="section" id="chatbot-section" style="display: none;">
+            <h2 class="section-title">Commander un Taxi</h2>
+            <div class="chatbot">
+                <div class="chat-header">
+                    <img src="image/robot.jpg" alt="Eden Assistant" class="chatbot-avatar">
+                    <div class="chatbot-info">
+                        <p class="chatbot-name">Eden Assistant</p>
+                        <p class="chatbot-status">En ligne</p>
+                    </div>
+                </div>
+                <div class="chat-messages" id="chat-messages-client">
+                    <!-- Messages will be added here dynamically -->
+                </div>
+                <div style="margin-top: 15px;">
+                    <button class="order-button" id="order-taxi-button">Commander un taxi maintenant</button>
+                </div>
             </div>
         </div>
-        <div class="slide" style="background-image: url('image/livraison.jpg');">
-            <div class="slide-overlay"></div>
-            <div class="slide-content">
-                <h2>Expertise et Innovation à Votre Service</h2>
-                <p>Notre équipe de professionnels qualifiés vous accompagne dans chaque étape de votre développement commercial.</p>
-                <a href="#services" class="btn">Découvrir Nos Services</a>
-            </div>
-        </div>
-        <div class="slide" style="background-image: url('image/livraison.jpg');">
-            <div class="slide-overlay"></div>
-            <div class="slide-content">
-                <h2>Solutions Sur Mesure pour Votre Réussite</h2>
-                <p>Des services adaptés à vos besoins spécifiques pour maximiser votre potentiel et atteindre vos objectifs.</p>
-                <a href="#services" class="btn">Découvrir Nos Services</a>
-            </div>
-        </div>
-        <div class="slide-indicators">
-            <div class="slide-indicator active"></div>
-            <div class="slide-indicator"></div>
-            <div class="slide-indicator"></div>
-        </div>
-    </section>
-    
-    <section id="services" class="services">
-        <div class="container">
-            <div class="section-header">
-                <h2>Nos Services</h2>
-                <p>Des solutions adaptées à vos besoins spécifiques</p>
-            </div>
-            
+        
+        <!-- Services Section -->
+        <div class="section">
+            <h2 class="section-title">Autres Services</h2>
             <div class="services-grid">
                 <div class="service-card">
-                    <div class="service-img">
-                        <img src="image/livraison.jpg" alt="Eden Service">
-                    </div>
-                    <div class="service-content">
-                        <h3>Eden Service</h3>
-                        <p>Un service complet de gestion et d'optimisation pour vos projets d'entreprise. Notre équipe d'experts vous accompagne à chaque étape pour garantir l'excellence et l'efficacité.</p>
-                        <a href="eden.html" class="btn">Découvrir</a>
-                    </div>
+                    <div class="service-icon">🏢</div>
+                    <h3>Transport vers Aéroport</h3>
+                    <p>Service rapide et ponctuel vers tous les aéroports</p>
                 </div>
-                
                 <div class="service-card">
-                    <div class="service-img">
-                        <img src="image/taxi moto.jpg" alt="Alls Service">
-                    </div>
-                    <div class="service-content">
-                        <h3>TAXI MOTO Jacqueville</h3>
-                        <p>Spécialisé dans le transport, nous sommes toujours a l'heure quelque soit l'heure.</p>
-                        <a href="taxi.html" class="btn">Commandé un taxi</a>
-                    </div>
+                    <div class="service-icon">📦</div>
+                    <h3>Livraison Express</h3>
+                    <p>Livraison de colis dans toute la ville</p>
                 </div>
-                
                 <div class="service-card">
-                    <div class="service-img">
-                        <img src="image/robot.jpg" alt="Marcio IA">
+                    <div class="service-icon">🚖</div>
+                    <h3>Réservation à l'avance</h3>
+                    <p>Planifiez vos trajets importants</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Map Section -->
+        <div class="section">
+            <h2 class="section-title">Carte de la Ville</h2>
+            <div class="map-container">
+                <div id="map">
+                    <div class="map-placeholder">
+                        Carte de la ville - Chargement...
                     </div>
-                    <div class="service-content">
-                        <h3>Marcio IA</h3>
-                        <p>Un dictionnaire en ligne révolutionnaire propulsé par l'intelligence artificielle. Accédez à des définitions précises, des traductions et des exemples contextuels en temps réel.</p>
-                        <a href="marcio.html" class="btn">Découvrir</a>
-                    </div>
                 </div>
             </div>
         </div>
-    </section>
-    
-    <section class="testimonials">
-        <div class="container">
-            <div class="section-header">
-                <h2>Témoignages Clients</h2>
-                <p>Ce que nos clients disent de nous</p>
-            </div>
-            
-            <div class="services-grid">
+        
+        <!-- Testimonials Section -->
+        <div class="section">
+            <h2 class="section-title">Avis Clients</h2>
+            <div class="testimonials">
                 <div class="testimonial-card">
-                    <p>"Eden Service a complètement transformé notre approche de gestion de projet. Nous avons constaté une augmentation significative de notre productivité."</p>
-                    <div class="name">TRAORE Issouf, Directrice des Opérations</div>
+                    <p class="testimonial-text">"Service rapide et professionnel. Le chauffeur est arrivé à l'heure et m'a conduit en toute sécurité à ma destination."</p>
+                    <p class="testimonial-author">- Marie L.</p>
                 </div>
-                
                 <div class="testimonial-card">
-                    <p>"Moi je n'y' croyait, toujours a l'heure."</p>
-                    <div class="name">Cheick, PDG</div>
+                    <p class="testimonial-text">"Application facile à utiliser. J'ai commandé un taxi et en moins de 5 minutes, il était à ma porte. Impressionnant !"</p>
+                    <p class="testimonial-author">- Thomas B.</p>
                 </div>
-                
                 <div class="testimonial-card">
-                    <p>"Marcio IA est devenu un outil indispensable pour notre équipe. Son dictionnaire intelligent nous fait gagner un temps précieux chaque jour."</p>
-                    <div class="name">Sophonie, Responsable Communication</div>
+                    <p class="testimonial-text">"Excellent service pour éviter les embouteillages. Le chauffeur connaissait des raccourcis efficaces."</p>
+                    <p class="testimonial-author">- Sophia M.</p>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
     
-    <section class="cta">
-        <div class="container">
-            <h2>Prêt à Transformer Votre Entreprise?</h2>
-            <p>Contactez-nous dès aujourd'hui pour découvrir comment nos services peuvent vous aider à atteindre vos objectifs commerciaux.</p>
-            <a href="#contact" class="btn">Contactez-Nous</a>
+    <!-- Modal About -->
+    <div id="about-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('about-modal')">&times;</span>
+            <h2>À propos d'Eden Taxi Moto</h2>
+            <p>Eden Taxi Moto est un service de transport à moto professionnel opérant dans toute la ville. Notre flotte de motos et nos chauffeurs expérimentés vous garantissent un service rapide, sécurisé et fiable.</p>
+            <p>Nous proposons des services de transport de personnes, de livraison de colis et de transport vers les aéroports.</p>
         </div>
-    </section>
+    </div>
     
-    <footer id="contact">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>À Propos</h3>
-                    <p>ServicePro est une entreprise innovante spécialisée dans la fourniture de services professionnels de haute qualité pour les entreprises de toutes tailles.</p>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>Liens Rapides</h3>
-                    <ul>
-                        <li><a href="#accueil"><i class="fas fa-chevron-right"></i> Accueil</a></li>
-                        <li><a href="#services"><i class="fas fa-chevron-right"></i> Services</a></li>
-                        <li><a href="#about"><i class="fas fa-chevron-right"></i> À Propos</a></li>
-                        <li><a href="#contact"><i class="fas fa-chevron-right"></i> Contact</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>Contact</h3>
-                    <p class="contact-info"><i class="fas fa-envelope"></i> zinzindohouemarcio@gmail.com</p>
-                    <p class="contact-info"><i class="fas fa-phone"></i> +2250172369840</p>
-                    <p class="contact-info"><i class="fas fa-map-marker-alt"></i> 123 Avenue des services de ISSOUF TRAORE</p>
-                </div>
-            </div>
-            
-            <div class="footer-bottom">
-                <p>&copy; 2025 ServicePro. Tous droits réservés. Edit by Marcio Jardel ZINZINDOHOUE</p>
-            </div>
+    <!-- Modal Contact -->
+    <div id="contact-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('contact-modal')">&times;</span>
+            <h2>Contactez-nous</h2>
+            <p><strong>Téléphone:</strong> 0172369840</p>
+            <p><strong>Email:</strong> zinzindohouemarcio@gmail.com</p>
+            <p><strong>Adresse:</strong> 123 Avenue des TRAORE</p>
         </div>
-    </footer>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer">
+        <p>&copy; 2025 Eden Taxi Moto. Tous droits réservés.</p>
+    </div>
 
     <script>
-        // Slideshow functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const slides = document.querySelectorAll('.slide');
-            const indicators = document.querySelectorAll('.slide-indicator');
-            let currentSlide = 0;
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBSPNvZqwX31r2b9GqyyxTmfjXGpNmAvzI",
+            authDomain: "marcius-82e4c.firebaseapp.com",
+            databaseURL: "https://marcius-82e4c-default-rtdb.firebaseio.com",
+            projectId: "marcius-82e4c",
+            storageBucket: "marcius-82e4c.firebasestorage.app",
+            messagingSenderId: "345743987757",
+            appId: "1:345743987757:web:cb6941f795ff99ad8e54a4",
+            measurementId: "G-K6S4BKPR10"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // User data
+        let userData = {
+            name: '',
+            firstname: '',
+            phone: '',
+            location: null
+        };
+
+        // DOM elements
+        const registrationSection = document.getElementById('registration-section');
+        const chatbotSection = document.getElementById('chatbot-section');
+        const chatMessagesClient = document.getElementById('chat-messages-client');
+        const registerButton = document.getElementById('register-button');
+        const locationButton = document.getElementById('location-button');
+        const locationStatus = document.getElementById('location-status');
+        const orderTaxiButton = document.getElementById('order-taxi-button');
+        const mapElement = document.getElementById('map');
+        
+        // Variables pour la carte
+        let map = null;
+        let userMarker = null;
+        
+        // Event listeners
+        locationButton.addEventListener('click', getLocation);
+        registerButton.addEventListener('click', handleRegistration);
+        orderTaxiButton.addEventListener('click', orderTaxi);
+        
+        // Initialiser la carte avec un placeholder
+        initMapPlaceholder();
+        
+        function initMapPlaceholder() {
+            mapElement.innerHTML = `
+                <div class="map-placeholder">
+                    <div style="text-align: center;">
+                        <div style="font-size: 50px; margin-bottom: 20px;">🗺️</div>
+                        <p>Activez la localisation pour afficher la carte</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Initialiser la carte avec Leaflet
+        function initMap(latitude, longitude) {
+            // Effacer le contenu actuel
+            mapElement.innerHTML = '';
             
-            // Function to show slide
-            function showSlide(index) {
-                slides.forEach(slide => slide.classList.remove('active'));
-                indicators.forEach(indicator => indicator.classList.remove('active'));
-                
-                slides[index].classList.add('active');
-                indicators[index].classList.add('active');
-                currentSlide = index;
-            }
+            // Créer la carte centrée sur la position de l'utilisateur
+            map = L.map('map').setView([latitude, longitude], 14);
             
-            // Event listeners for indicators
-            indicators.forEach((indicator, index) => {
-                indicator.addEventListener('click', () => {
-                    showSlide(index);
-                });
+            // Ajouter une couche de carte (OpenStreetMap)
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // Ajouter un marqueur pour la position de l'utilisateur
+            userMarker = L.marker([latitude, longitude]).addTo(map)
+                .bindPopup('Votre position actuelle')
+                .openPopup();
+            
+            // Ajouter quelques marqueurs fictifs pour les taxis disponibles dans un rayon de 2km
+            addFakeTaxiMarkers(latitude, longitude, 5);
+            
+            // Ajouter un cercle pour représenter la zone de service
+            L.circle([latitude, longitude], {
+                color: '#0084ff',
+                fillColor: '#0084ff',
+                fillOpacity: 0.1,
+                radius: 3000 // rayon en mètres (3km)
+            }).addTo(map);
+        }
+        
+        function addFakeTaxiMarkers(lat, lng, count) {
+            // Icône personnalisée pour les taxis
+            const taxiIcon = L.divIcon({
+                html: '🏍️',
+                className: 'taxi-icon',
+                iconSize: [30, 30]
             });
             
-            // Auto slideshow
-            function nextSlide() {
-                let next = currentSlide + 1;
-                if (next >= slides.length) next = 0;
-                showSlide(next);
-            }
-            
-            // Change slide every 5 seconds
-            setInterval(nextSlide, 5000);
-            
-            // Sticky navbar
-            const navbar = document.getElementById('navbar');
-            window.addEventListener('scroll', () => {
-                if (window.scrollY > 100) {
-                    navbar.classList.add('scrolled');
-                } else {
-                    navbar.classList.remove('scrolled');
-                }
-            });
-        });
-    </script>
-</body>
-</html>
-<!-- Ajoutez ce code où vous souhaitez que le bouton apparaisse, par exemple juste après la section du footer -->
-
-<!-- Bouton de sécurité -->
-<div class="security-button-container">
-    <button id="securityBtn" class="security-btn">Accès Sécurité</button>
-</div>
-
-<!-- Modal de mot de passe -->
-<div id="passwordModal" class="password-modal">
-    <div class="password-modal-content">
-        <span class="close-modal">&times;</span>
-        <h3>Authentification requise</h3>
-        <p>Veuillez entrer le mot de passe pour accéder à la zone sécurisée.</p>
-        <input type="password" id="securityPassword" placeholder="Mot de passe">
-        <button id="submitPassword">Valider</button>
-        <p id="passwordError" class="error-message"></p>
-    </div>
-</div>
-
-<!-- Style pour le bouton et le modal -->
-<style>
-    .security-button-container {
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        z-index: 1000;
-    }
-
-    .security-btn {
-        background-color: var(--primary-color);
-        color: white;
-        border: none;
-        border-radius: 50px;
-        padding: 15px 25px;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .security-btn::before {
-        content: '\f023';
-        font-family: 'Font Awesome 5 Free';
-        font-weight: 900;
-    }
-
-    .security-btn:hover {
-        background-color: var(--secondary-color);
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-    }
-
-    /* Modal styles */
-    .password-modal {
-        display: none;
-        position: fixed;
-        z-index: 2000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(5px);
-    }
-
-    .password-modal-content {
-        background-color: white;
-        margin: 15% auto;
-        padding: 30px;
-        width: 90%;
-        max-width: 400px;
-        border-radius: 10px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        position: relative;
-        animation: modalFadeIn 0.4s;
-    }
-
-    @keyframes modalFadeIn {
-        from {opacity: 0; transform: translateY(-30px);}
-        to {opacity: 1; transform: translateY(0);}
-    }
-
-    .close-modal {
-        position: absolute;
-        top: 15px;
-        right: 20px;
-        color: #999;
-        font-size: 28px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: color 0.3s;
-    }
-
-    .close-modal:hover {
-        color: var(--accent-color);
-    }
-
-    .password-modal h3 {
-        color: var(--primary-color);
-        margin-bottom: 15px;
-        font-size: 1.5rem;
-    }
-
-    .password-modal p {
-        margin-bottom: 20px;
-        color: var(--text-light);
-    }
-
-    .password-modal input {
-        width: 100%;
-        padding: 12px;
-        margin-bottom: 20px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 16px;
-        transition: border-color 0.3s;
-    }
-
-    .password-modal input:focus {
-        border-color: var(--secondary-color);
-        outline: none;
-    }
-
-    .password-modal button {
-        background-color: var(--secondary-color);
-        color: white;
-        border: none;
-        padding: 12px 20px;
-        border-radius: 4px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        width: 100%;
-        transition: background-color 0.3s;
-    }
-
-    .password-modal button:hover {
-        background-color: #0066b3;
-    }
-
-    .error-message {
-        color: #e74c3c;
-        margin-top: 15px;
-        display: none;
-        font-size: 0.9rem;
-    }
-</style>
-
-<!-- Script pour la fonctionnalité du bouton et vérification du mot de passe -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const securityBtn = document.getElementById('securityBtn');
-        const passwordModal = document.getElementById('passwordModal');
-        const closeModal = document.querySelector('.close-modal');
-        const submitPassword = document.getElementById('submitPassword');
-        const passwordInput = document.getElementById('securityPassword');
-        const passwordError = document.getElementById('passwordError');
-        
-        // Mot de passe correct
-        const correctPassword = 'marcio@2003';
-        
-        // Ouvrir le modal quand on clique sur le bouton
-        securityBtn.addEventListener('click', function() {
-            passwordModal.style.display = 'block';
-            passwordInput.value = '';
-            passwordError.style.display = 'none';
-        });
-        
-        // Fermer le modal
-        closeModal.addEventListener('click', function() {
-            passwordModal.style.display = 'none';
-        });
-        
-        // Quand on clique à l'extérieur du modal
-        window.addEventListener('click', function(event) {
-            if (event.target === passwordModal) {
-                passwordModal.style.display = 'none';
-            }
-        });
-        
-        // Vérifier le mot de passe
-        submitPassword.addEventListener('click', checkPassword);
-        
-        // Permettre de soumettre avec Enter
-        passwordInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                checkPassword();
-            }
-        });
-        
-        function checkPassword() {
-            if (passwordInput.value === correctPassword) {
-                // Si le mot de passe est correct, rediriger vers sécurité.html
-                window.location.href = 'sécurité.html';
-            } else {
-                // Afficher une erreur
-                passwordError.textContent = 'Mot de passe incorrect. Veuillez réessayer.';
-                passwordError.style.display = 'block';
-                passwordInput.value = '';
+            // Ajouter des marqueurs fictifs pour les motos-taxis disponibles
+            for (let i = 0; i < count; i++) {
+                // Générer des positions aléatoires dans un rayon de 2km
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 0.02; // ~2km en degrés approximativement
+                const newLat = lat + distance * Math.cos(angle);
+                const newLng = lng + distance * Math.sin(angle);
                 
-                // Animation de secousse
-                passwordInput.classList.add('shake');
-                setTimeout(() => {
-                    passwordInput.classList.remove('shake');
-                }, 500);
+                L.marker([newLat, newLng], {icon: taxiIcon}).addTo(map)
+                    .bindPopup('Moto-taxi disponible');
             }
         }
         
-        // Ajouter l'animation de secousse 
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes shake {
-                0%, 100% {transform: translateX(0);}
-                20%, 60% {transform: translateX(-5px);}
-                40%, 80% {transform: translateX(5px);}
+        function getLocation() {
+            if (navigator.geolocation) {
+                locationStatus.textContent = "Localisation: En cours...";
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        userData.location = {
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                            timestamp: new Date().getTime()
+                        };
+                        locationStatus.textContent = "Localisation: Activée ✓";
+                        locationStatus.style.color = "green";
+                        locationButton.textContent = "Localisation activée ✓";
+                        locationButton.style.backgroundColor = "#28a745";
+                        
+                        // Initialiser la carte avec la position réelle
+                        initMap(position.coords.latitude, position.coords.longitude);
+                        
+                        checkFormCompletion();
+                    },
+                    (error) => {
+                        locationStatus.textContent = "Localisation: Erreur";
+                        locationStatus.style.color = "red";
+                        alert("Erreur de géolocalisation: " + error.message);
+                    }
+                );
+            } else {
+                locationStatus.textContent = "Localisation: Non supportée par votre navigateur";
+                locationStatus.style.color = "red";
+                alert("La géolocalisation n'est pas prise en charge par ce navigateur.");
             }
-            .shake {
-                animation: shake 0.5s;
+        }
+        
+        function checkFormCompletion() {
+            const nameInput = document.getElementById('user-name');
+            const firstnameInput = document.getElementById('user-firstname');
+            const phoneInput = document.getElementById('user-phone');
+            
+            if (nameInput.value && firstnameInput.value && phoneInput.value && userData.location) {
+                registerButton.disabled = false;
+            } else {
+                registerButton.disabled = true;
             }
-        `;
-        document.head.appendChild(style);
+        }
+        
+        // Ajout d'écouteurs d'événements pour les champs input
+        document.getElementById('user-name').addEventListener('input', checkFormCompletion);
+        document.getElementById('user-firstname').addEventListener('input', checkFormCompletion);
+        document.getElementById('user-phone').addEventListener('input', checkFormCompletion);
+        
+        function handleRegistration() {
+            // Récupérer les valeurs du formulaire
+            userData.name = document.getElementById('user-name').value;
+            userData.firstname = document.getElementById('user-firstname').value;
+            userData.phone = document.getElementById('user-phone').value;
+            
+            // Sauvegarder l'utilisateur dans Firebase
+            const userId = 'user_' + new Date().getTime();
+            database.ref('users/' + userId).set({
+                name: userData.name,
+                firstname: userData.firstname,
+                phone: userData.phone,
+                location: userData.location,
+                registeredAt: firebase.database.ServerValue.TIMESTAMP
+            });
+            
+            // Masquer le formulaire d'inscription et afficher le chatbot
+            registrationSection.style.display = 'none';
+            chatbotSection.style.display = 'block';
+            
+            // Initialiser le chatbot
+            initChatbot();
+        }
+        
+        function initChatbot() {
+            addBotMessage(`👋 Bonjour ${userData.firstname} ! Bienvenue sur Eden Taxi Moto.`);
+            addBotMessage("Pour commander un taxi, cliquez sur le bouton ci-dessous.");
+        }
+        
+        function orderTaxi() {
+            // Générer un ID unique pour la requête
+            const requestId = 'request_' + new Date().getTime();
+            
+            // Sauvegarder la demande dans Firebase
+            database.ref('requests/' + requestId).set({
+                name: userData.name,
+                firstname: userData.firstname,
+                phone: userData.phone,
+                location: userData.location,
+                status: 'pending',
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+            
+            addUserMessage("Je souhaite commander un taxi maintenant");
+            addBotMessage("✅ Votre demande a été enregistrée ! Un chauffeur vous contactera très prochainement au " + userData.phone + ".");
+            
+            // Ajouter une animation sur la carte pour montrer que la recherche est en cours
+            if (map && userMarker) {
+                // Faire pulser le marqueur de l'utilisateur
+                userMarker.bindPopup('Recherche de taxi en cours...').openPopup();
+                
+                // Simuler l'arrivée d'un taxi (pour démonstration)
+                setTimeout(() => {
+                    // Créer un marqueur qui se déplace vers l'utilisateur
+                    const lat = userData.location.latitude;
+                    const lng = userData.location.longitude;
+                    const startLat = lat + 0.01;
+                    const startLng = lng + 0.01;
+                    
+                    const taxiIcon = L.divIcon({
+                        html: '🏍️',
+                        className: 'assigned-taxi',
+                        iconSize: [40, 40]
+                    });
+                    
+                    const movingTaxi = L.marker([startLat, startLng], {icon: taxiIcon}).addTo(map)
+                        .bindPopup('Votre taxi arrive !');
+                        
+                    // Mise à jour du statut dans Firebase
+                    database.ref('requests/' + requestId).update({
+                        status: 'accepted',
+                        estimatedTime: '5'
+                    });
+                }, 5000);
+            }
+            
+            // Désactiver temporairement le bouton pour éviter les commandes multiples
+            orderTaxiButton.disabled = true;
+            orderTaxiButton.textContent = "Demande en cours...";
+            
+            // Réactiver le bouton après 30 secondes
+            setTimeout(() => {
+                orderTaxiButton.disabled = false;
+                orderTaxiButton.textContent = "Commander un taxi";
+            }, 30000);
+            
+            // Écouter les mises à jour
+            database.ref('requests/' + requestId).on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data && data.status === 'accepted') {
+                    addBotMessage("🏍️ Bonne nouvelle ! Un chauffeur a accepté votre course et sera chez vous dans environ " + data.estimatedTime + " minutes.");
+                }
+            });
+        }
+        
+        function addBotMessage(message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message bot-message';
+            messageDiv.textContent = message;
+            chatMessagesClient.appendChild(messageDiv);
+            chatMessagesClient.scrollTop = chatMessagesClient.scrollHeight;
+        }
+        
+        function addUserMessage(message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message user-message';
+            messageDiv.textContent = message;
+            chatMessagesClient.appendChild(messageDiv);
+            chatMessagesClient.scrollTop = chatMessagesClient.scrollHeight;
+        }
+        
+        function showSection(sectionId) {
+            if (sectionId === 'home') {
+                window.location.href = 'eden.html';
+            }
+        }
+        
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        // Vérifier si l'utilisateur est déjà inscrit au chargement de la page
+window.addEventListener('DOMContentLoaded', checkExistingUser);
+
+function checkExistingUser() {
+    // Récupérer les données utilisateur depuis le localStorage
+    const savedUser = localStorage.getItem('edenTaxiUser');
+    
+    if (savedUser) {
+        // Restaurer les données
+        userData = JSON.parse(savedUser);
+        
+        // Masquer le formulaire d'inscription et afficher le chatbot
+        registrationSection.style.display = 'none';
+        chatbotSection.style.display = 'block';
+        
+        // Initialiser le chatbot
+        initChatbot();
+        
+        // Initialiser la carte avec la position sauvegardée
+        if (userData.location) {
+            initMap(userData.location.latitude, userData.location.longitude);
+        } else {
+            initMapPlaceholder();
+        }
+    }
+}
+
+// Modifier la fonction handleRegistration pour sauvegarder les données dans localStorage
+function handleRegistration() {
+    // Récupérer les valeurs du formulaire
+    userData.name = document.getElementById('user-name').value;
+    userData.firstname = document.getElementById('user-firstname').value;
+    userData.phone = document.getElementById('user-phone').value;
+    
+    // Sauvegarder l'utilisateur dans Firebase
+    const userId = 'user_' + new Date().getTime();
+    database.ref('users/' + userId).set({
+        name: userData.name,
+        firstname: userData.firstname,
+        phone: userData.phone,
+        location: userData.location,
+        registeredAt: firebase.database.ServerValue.TIMESTAMP
     });
-</script>
+    
+    // Sauvegarder les données utilisateur dans localStorage
+    localStorage.setItem('edenTaxiUser', JSON.stringify(userData));
+    
+    // Masquer le formulaire d'inscription et afficher le chatbot
+    registrationSection.style.display = 'none';
+    chatbotSection.style.display = 'block';
+    
+    // Initialiser le chatbot
+    initChatbot();
+}
+
+// Ajouter une fonction pour se déconnecter (à utiliser si besoin)
+function logout() {
+    // Supprimer les données du localStorage
+    localStorage.removeItem('edenTaxiUser');
+    
+    // Réinitialiser les données utilisateur
+    userData = {
+        name: '',
+        firstname: '',
+        phone: '',
+        location: null
+    };
+    
+    // Afficher le formulaire d'inscription et masquer le chatbot
+    registrationSection.style.display = 'block';
+    chatbotSection.style.display = 'none';
+    
+    // Réinitialiser la carte
+    initMapPlaceholder();
+}
+        
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
