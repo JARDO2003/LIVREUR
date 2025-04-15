@@ -656,8 +656,17 @@
                 // Options d'affichage des instructions
                 createMarker: function() { return null; }, // Pas de marqueurs supplémentaires
                 addWaypoints: true, // Permet d'ajouter des points intermédiaires
-                draggableWaypoints: true // Points de passage déplaçables
+                draggableWaypoints: true, // Points de passage déplaçables
+                show: false // Masquer les instructions par défaut
             }).addTo(map);
+            
+            // Masquer le conteneur d'instructions dès qu'il est créé
+            setTimeout(() => {
+                const instructionsContainer = document.querySelector('.leaflet-routing-container');
+                if (instructionsContainer) {
+                    instructionsContainer.style.display = 'none';
+                }
+            }, 100);
             
             // Ajouter un bouton pour recalculer l'itinéraire
             const recalculateBtn = L.control({position: 'topright'});
@@ -670,6 +679,27 @@
                 return div;
             };
             recalculateBtn.addTo(map);
+            
+            // Ajouter un bouton pour afficher/masquer les instructions d'itinéraire
+            const instructionsBtn = L.control({position: 'bottomright'});
+            instructionsBtn.onAdd = function() {
+                const div = L.DomUtil.create('div', 'instructions-btn');
+                div.innerHTML = '<button style="padding:6px 10px; background-color:#0084ff; color:white; border:none; border-radius:4px; cursor:pointer;">Afficher instructions</button>';
+                div.onclick = function() {
+                    const instructionsContainer = document.querySelector('.leaflet-routing-container');
+                    if (instructionsContainer) {
+                        if (instructionsContainer.style.display === 'none') {
+                            instructionsContainer.style.display = 'block';
+                            div.querySelector('button').textContent = 'Masquer instructions';
+                        } else {
+                            instructionsContainer.style.display = 'none';
+                            div.querySelector('button').textContent = 'Afficher instructions';
+                        }
+                    }
+                };
+                return div;
+            };
+            instructionsBtn.addTo(map);
             
             // Ajouter suivi de position en temps réel
             startPositionTracking(clientLocation);
