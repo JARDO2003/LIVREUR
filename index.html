@@ -333,163 +333,6 @@
             padding: 20px 0;
             margin-top: 40px;
         }
-
-        /* AJOUT DES STYLES RESPONSIVE */
-        
-        /* Pour tablettes */
-        @media screen and (max-width: 768px) {
-            .container {
-                padding: 0 15px;
-            }
-            
-            .services-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .testimonials {
-                grid-template-columns: 1fr;
-            }
-            
-            .modal-content {
-                margin: 15% auto;
-                max-width: 90%;
-            }
-            
-            .chatbot {
-                height: 350px;
-            }
-            
-            .map-container {
-                height: 350px;
-            }
-        }
-        
-        /* Pour mobiles */
-        @media screen and (max-width: 480px) {
-            .header h1 {
-                font-size: 1.5rem;
-            }
-            
-            .nav-menu {
-                flex-direction: column;
-                align-items: center;
-                gap: 10px;
-            }
-            
-            .nav-button {
-                width: 80%;
-                margin: 0;
-            }
-            
-            .services-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .section {
-                padding: 15px;
-            }
-            
-            .chatbot {
-                height: 300px;
-                padding: 10px;
-            }
-            
-            .chatbot-avatar {
-                width: 40px;
-                height: 40px;
-            }
-            
-            .order-button {
-                font-size: 16px;
-                padding: 10px;
-            }
-            
-            .map-container {
-                height: 300px;
-            }
-            
-            .modal-content {
-                margin: 20% auto;
-                padding: 15px;
-            }
-            
-            .service-icon {
-                font-size: 30px;
-            }
-            
-            .message {
-                max-width: 90%;
-                padding: 8px;
-            }
-        }
-        
-        /* Pour très petits écrans */
-        @media screen and (max-width: 320px) {
-            .header h1 {
-                font-size: 1.2rem;
-            }
-            
-            .section-title {
-                font-size: 1.3rem;
-            }
-            
-            .chatbot {
-                height: 250px;
-            }
-            
-            .chat-messages {
-                padding: 5px;
-            }
-            
-            .map-container {
-                height: 250px;
-            }
-            
-            .order-button {
-                font-size: 14px;
-                padding: 8px;
-            }
-            
-            .form-button {
-                padding: 10px;
-            }
-            
-            input[type="text"], 
-            input[type="tel"] {
-                padding: 8px;
-                font-size: 14px;
-            }
-        }
-        
-        /* Pour les écrans à orientation paysage sur mobile */
-        @media screen and (max-height: 480px) and (orientation: landscape) {
-            .chatbot {
-                height: 200px;
-            }
-            
-            .map-container {
-                height: 200px;
-            }
-            
-            .modal-content {
-                margin: 5% auto;
-            }
-        }
-
-        /* Pour les écrans de grande taille */
-        @media screen and (min-width: 1200px) {
-            .container {
-                max-width: 1200px;
-            }
-            
-            .services-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            
-            .testimonials {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
     </style>
 </head>
 <body>
@@ -503,6 +346,8 @@
         <button class="nav-button" onclick="showSection('home')">Accueil</button>
         <button class="nav-button" onclick="showModal('about-modal')">À propos</button>
         <button class="nav-button" onclick="showModal('contact-modal')">Contact</button>
+        <button class="nav-button" onclick="window.location.href='fournisseur.html'">Partenaire</button>
+
     </div>
     
     <div class="container">
@@ -637,14 +482,14 @@
     <script>
         // Initialize Firebase
         const firebaseConfig = {
-            apiKey: "AIzaSyBSPNvZqwX31r2b9GqyyxTmfjXGpNmAvzI",
-            authDomain: "marcius-82e4c.firebaseapp.com",
-            databaseURL: "https://marcius-82e4c-default-rtdb.firebaseio.com",
-            projectId: "marcius-82e4c",
-            storageBucket: "marcius-82e4c.firebasestorage.app",
-            messagingSenderId: "345743987757",
-            appId: "1:345743987757:web:cb6941f795ff99ad8e54a4",
-            measurementId: "G-K6S4BKPR10"
+            apiKey: "AIzaSyC1pJG97RoIJL-zvrRP5OaJAIVkFNoMC1Q",
+            authDomain: "livreur-21be8.firebaseapp.com",
+            databaseURL: "https://livreur-21be8-default-rtdb.firebaseio.com",
+            projectId: "livreur-21be8",
+            storageBucket: "livreur-21be8.firebasestorage.app",
+            messagingSenderId: "330461481415",
+            appId: "1:330461481415:web:3c9987401062181f9731e2",
+            measurementId: "G-1KWC1NCJ45"
         };
         
         firebase.initializeApp(firebaseConfig);
@@ -825,14 +670,17 @@
             // Générer un ID unique pour la requête
             const requestId = 'request_' + new Date().getTime();
             
-            // Sauvegarder la demande dans Firebase
+            // Sauvegarder la demande dans Firebase dans un format qui sera utile pour les fournisseurs
             database.ref('requests/' + requestId).set({
                 name: userData.name,
                 firstname: userData.firstname,
                 phone: userData.phone,
                 location: userData.location,
-                status: 'pending',
-                timestamp: firebase.database.ServerValue.TIMESTAMP
+                status: 'pending',  // les états possibles sont: 'pending', 'accepted', 'completed', 'canceled'
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                assignedTo: null,   // ID du fournisseur qui accepte la commande
+                pickupAddress: 'Votre position actuelle', // À améliorer avec géocodage inverse
+                isAvailable: true   // important: indique que cette commande est disponible pour les fournisseurs
             });
             
             addUserMessage("Je souhaite commander un taxi maintenant");
@@ -842,30 +690,6 @@
             if (map && userMarker) {
                 // Faire pulser le marqueur de l'utilisateur
                 userMarker.bindPopup('Recherche de taxi en cours...').openPopup();
-                
-                // Simuler l'arrivée d'un taxi (pour démonstration)
-                setTimeout(() => {
-                    // Créer un marqueur qui se déplace vers l'utilisateur
-                    const lat = userData.location.latitude;
-                    const lng = userData.location.longitude;
-                    const startLat = lat + 0.01;
-                    const startLng = lng + 0.01;
-                    
-                    const taxiIcon = L.divIcon({
-                        html: '🏍️',
-                        className: 'assigned-taxi',
-                        iconSize: [40, 40]
-                    });
-                    
-                    const movingTaxi = L.marker([startLat, startLng], {icon: taxiIcon}).addTo(map)
-                        .bindPopup('Votre taxi arrive !');
-                        
-                    // Mise à jour du statut dans Firebase
-                    database.ref('requests/' + requestId).update({
-                        status: 'accepted',
-                        estimatedTime: '5'
-                    });
-                }, 5000);
             }
             
             // Désactiver temporairement le bouton pour éviter les commandes multiples
@@ -878,11 +702,33 @@
                 orderTaxiButton.textContent = "Commander un taxi";
             }, 30000);
             
-            // Écouter les mises à jour
+            // Écouter les mises à jour de la commande
             database.ref('requests/' + requestId).on('value', (snapshot) => {
                 const data = snapshot.val();
-                if (data && data.status === 'accepted') {
-                    addBotMessage("🏍️ Bonne nouvelle ! Un chauffeur a accepté votre course et sera chez vous dans environ " + data.estimatedTime + " minutes.");
+                if (data) {
+                    // Si la commande est acceptée par un chauffeur
+                    if (data.status === 'accepted' && data.assignedTo) {
+                        addBotMessage("🏍️ Bonne nouvelle ! Un chauffeur a accepté votre course et sera chez vous dans environ " + 
+                                      (data.estimatedTime || "5") + " minutes.");
+                        
+                        // Simuler l'arrivée d'un taxi sur la carte
+                        if (map && userData.location) {
+                            // Créer un marqueur qui se déplace vers l'utilisateur
+                            const lat = userData.location.latitude;
+                            const lng = userData.location.longitude;
+                            const startLat = lat + 0.01;
+                            const startLng = lng + 0.01;
+                            
+                            const taxiIcon = L.divIcon({
+                                html: '🏍️',
+                                className: 'assigned-taxi',
+                                iconSize: [40, 40]
+                            });
+                            
+                            const movingTaxi = L.marker([startLat, startLng], {icon: taxiIcon}).addTo(map)
+                                .bindPopup('Votre taxi arrive !');
+                        }
+                    }
                 }
             });
         }
@@ -998,6 +844,7 @@ function logout() {
                 event.target.style.display = 'none';
             }
         }
+        
     </script>
 </body>
 </html>
