@@ -233,6 +233,51 @@
             padding: 20px 0;
             margin-top: 40px;
         }
+        
+        /* Styles pour le bouton de recalcul */
+        .recalculate-btn button {
+            background-color: #0084ff;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .recalculate-btn button:hover {
+            background-color: #0066cc;
+            transform: translateY(-1px);
+        }
+        
+        /* Stylisation des instructions de route */
+        .leaflet-routing-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 14px;
+        }
+        
+        .leaflet-routing-alt h2 {
+            font-size: 16px;
+            margin: 0;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .leaflet-routing-alt-minimized {
+            background-color: #f5f5f5;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -330,7 +375,9 @@
             id: 'driver_' + Math.floor(Math.random() * 1000000),
             online: false,
             location: null,
-            currentRequestId: null
+            currentRequestId: null,
+            watchId: null,
+            lastRecalcPosition: null
         };
         
         // Éléments DOM
@@ -380,7 +427,8 @@
                     </div>
                 `;
                 
-                // Masquer la carte si elle est visible
+                // Arrêter le suivi et masquer la carte
+                stopPositionTracking();
                 mapSection.style.display = 'none';
             }
         }
@@ -534,7 +582,10 @@
             
             // Initialiser la carte si ce n'est pas déjà fait
             if (!map) {
-                map = L.map('map');
+                map = L.map('map', {
+                    zoomControl: true,
+                    attributionControl: true
+                });
                 
                 // Ajouter une couche de carte (OpenStreetMap)
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -573,12 +624,16 @@
                 iconSize: [30, 30]
             });
             
-            // Ajouter les marqueurs
-            driverMarker = L.marker([driverLat, driverLng], {icon: driverIcon}).addTo(map)
-                .bindPopup('Votre position');
+            // Ajouter les marqueurs avec possibilité de les faire glisser
+            driverMarker = L.marker([driverLat, driverLng], {
+                icon: driverIcon, 
+                draggable: true // Permet de faire glisser le marqueur
+            }).addTo(map).bindPopup('Votre position');
             
-            clientMarker = L.marker([clientLat, clientLng], {icon: clientIcon}).addTo(map)
-                .bindPopup('Position du client').openPopup();
+            clientMarker = L.marker([clientLat, clientLng], {
+                icon: clientIcon, 
+                draggable: false // Le marqueur client n'est pas déplaçable
+            }).addTo(map).bindPopup('Position du client').openPopup();
             
             // Ajouter/mettre à jour l'itinéraire
             if (routingControl) map.removeControl(routingControl);
@@ -588,13 +643,168 @@
                     L.latLng(driverLat, driverLng),
                     L.latLng(clientLat, clientLng)
                 ],
-                routeWhileDragging: false,
-                showAlternatives: false,
+                routeWhileDragging: true, // Recalcule l'itinéraire pendant le glissement
+                showAlternatives: true,   // Affiche des itinéraires alternatifs
                 fitSelectedRoutes: true,
                 lineOptions: {
                     styles: [{color: '#0084ff', opacity: 0.8, weight: 6}]
-                }
+                },
+                router: L.Routing.osrmv1({
+                    serviceUrl: 'https://router.project-osrm.org/route/v1',
+                    profile: 'motorcycle' // Utiliser le profil moto
+                }),
+                // Options d'affichage des instructions
+                createMarker: function() { return null; }, // Pas de marqueurs supplémentaires
+                addWaypoints: true, // Permet d'ajouter des points intermédiaires
+                draggableWaypoints: true // Points de passage déplaçables
             }).addTo(map);
+            
+            // Ajouter un bouton pour recalculer l'itinéraire
+            const recalculateBtn = L.control({position: 'topright'});
+            recalculateBtn.onAdd = function() {
+                const div = L.DomUtil.create('div', 'recalculate-btn');
+                div.innerHTML = '<button style="padding:6px 10px; background-color:#0084ff; color:white; border:none; border-radius:4px; cursor:pointer;">Recalculer</button>';
+                div.onclick = function() {
+                    updateRoute();
+                };
+                return div;
+            };
+            recalculateBtn.addTo(map);
+            
+            // Ajouter suivi de position en temps réel
+            startPositionTracking(clientLocation);
+            
+            // Écouteur d'événement pour le déplacement du marqueur du conducteur
+            driverMarker.on('dragend', function() {
+                updateDriverPosition();
+            });
+        }
+        
+        // Mettre à jour la position du conducteur et recalculer l'itinéraire
+        function updateDriverPosition() {
+            if (!driverMarker || !routingControl) return;
+            
+            const newPos = driverMarker.getLatLng();
+            driverData.location = {
+                latitude: newPos.lat,
+                longitude: newPos.lng,
+                timestamp: new Date().getTime()
+            };
+            
+            // Mettre à jour la position dans Firebase
+            database.ref('drivers/' + driverData.id).update({
+                location: driverData.location,
+                lastUpdate: firebase.database.ServerValue.TIMESTAMP
+            });
+            
+            // Recalculer l'itinéraire
+            updateRoute();
+        }
+        
+        // Mettre à jour l'itinéraire
+        function updateRoute() {
+            if (!routingControl || !driverMarker || !clientMarker) return;
+            
+            const driverPos = driverMarker.getLatLng();
+            const clientPos = clientMarker.getLatLng();
+            
+            routingControl.setWaypoints([
+                L.latLng(driverPos.lat, driverPos.lng),
+                L.latLng(clientPos.lat, clientPos.lng)
+            ]);
+            
+            // Notification pour informer l'utilisateur
+            showNotification("Itinéraire recalculé!");
+        }
+        
+        // Suivi de position en temps réel
+        function startPositionTracking(clientLocation) {
+            if (navigator.geolocation) {
+                // Options pour obtenir la position la plus précise possible
+                const options = {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                };
+                
+                // ID du processus de suivi pour pouvoir l'arrêter plus tard
+                const watchId = navigator.geolocation.watchPosition(
+                    function(position) {
+                        // Mise à jour de la position du conducteur
+                        const newDriverLat = position.coords.latitude;
+                        const newDriverLng = position.coords.longitude;
+                        
+                        // Mettre à jour les données du conducteur
+                        driverData.location = {
+                            latitude: newDriverLat,
+                            longitude: newDriverLng,
+                            timestamp: new Date().getTime()
+                        };
+                        
+                        // Mettre à jour le marqueur sur la carte
+                        if (driverMarker) {
+                            driverMarker.setLatLng([newDriverLat, newDriverLng]);
+                        }
+                        
+                        // Mettre à jour Firebase
+                        database.ref('drivers/' + driverData.id).update({
+                            location: driverData.location,
+                            lastUpdate: firebase.database.ServerValue.TIMESTAMP
+                        });
+                        
+                        // Recalculer l'itinéraire si nécessaire (par exemple tous les X mètres)
+                        if (shouldRecalculateRoute(newDriverLat, newDriverLng, clientLocation)) {
+                            updateRoute();
+                        }
+                    },
+                    function(error) {
+                        console.error("Erreur de géolocalisation: ", error.message);
+                    },
+                    options
+                );
+                
+                // Stocker l'ID pour pouvoir arrêter le suivi plus tard
+                driverData.watchId = watchId;
+            }
+        }
+        
+        // Vérifier si l'itinéraire doit être recalculé en fonction de la distance parcourue
+        function shouldRecalculateRoute(newLat, newLng, clientLocation) {
+            // Si aucune dernière position connue, recalculer
+            if (!driverData.lastRecalcPosition) {
+                driverData.lastRecalcPosition = {
+                    latitude: newLat,
+                    longitude: newLng
+                };
+                return true;
+            }
+            
+            // Calculer la distance depuis la dernière recalculation
+            const distance = calculateDistance(
+                driverData.lastRecalcPosition.latitude,
+                driverData.lastRecalcPosition.longitude,
+                newLat,
+                newLng
+            );
+            
+            // Recalculer si distance > 100m (0.1km)
+            if (distance > 0.1) {
+                driverData.lastRecalcPosition = {
+                    latitude: newLat,
+                    longitude: newLng
+                };
+                return true;
+            }
+            
+            return false;
+        }
+        
+        // Arrêter le suivi de position
+        function stopPositionTracking() {
+            if (driverData.watchId && navigator.geolocation) {
+                navigator.geolocation.clearWatch(driverData.watchId);
+                driverData.watchId = null;
+            }
         }
         
         // Utilitaires
