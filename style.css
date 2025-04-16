@@ -1,0 +1,87 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-image: url('image/WhatsApp\ Image\ 2025-02-02\ à\ 03.07.02_01806dba.jpg'); /* Remplace 'ton_image.jpg' par le chemin vers ton image */
+    background-size: cover; /* Cela permet de couvrir tout l'écran avec l'image */
+    background-position: center; /* Centre l'image sur l'écran */
+    background-attachment: fixed; /* Empêche l'image de bouger lorsque l'on fait défiler la page */
+    color: #ddd;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh; /* Assure que le corps prend toute la hauteur de la fenêtre */
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function sendMessage() {
+    const wordInput = document.getElementById("wordInput");
+    const word = wordInput.value.trim();
+
+    if (word) {
+        // Display user message
+        displayMessage(word, "user");
+
+        // Fetch the definition from the API
+        fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Word not found');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const wordData = data[0];
+                const definition = wordData.meanings.map(meaning => 
+                    meaning.definitions.map(def => `<b>${def.definition}</b>`).join('<br>')
+                ).join('<br><br>');
+                const phonetic = wordData.phonetic || 'Not available';
+                const audio = wordData.phonetics[0]?.audio || '';
+
+                // Display bot response
+                displayMessage(`
+                    Definition: <br>${definition}<br><br>
+                    Phonetic: ${phonetic}<br>
+                    ${audio ? `<audio controls><source src="${audio}" type="audio/mp3"></audio>` : ''}
+                `, "bot");
+            })
+            .catch(error => {
+                // Handle error (e.g. word not found)
+                displayMessage(`Sorry, I couldn't find the word "${word}". Please try again.`, "bot");
+            });
+
+        // Clear the input field after sending
+        wordInput.value = '';
+    }
+}
+
+function displayMessage(message, sender) {
+    const chatBox = document.getElementById("chatBox");
+
+    // Create a message element
+    const messageElement = document.createElement("div");
+    messageElement.classList.add("message", `${sender}-message`);
+    messageElement.innerHTML = message;
+
+    // Append message to the chat box
+    chatBox.appendChild(messageElement);
+
+    // Scroll to the bottom of the chat box
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+

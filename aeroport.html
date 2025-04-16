@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Réservation de Transport Aéroport</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        form {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .success-message {
+            display: none;
+            background-color: #d4edda;
+            color: #155724;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .nav-links {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .nav-links a {
+            color: #3498db;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Réservation de Transport vers l'Aéroport</h1>
+    
+    <form id="reservationForm">
+        
+        
+        
+        
+        <div>
+            <label for="phone">Téléphone:</label>
+            <input type="tel" id="phone" required>
+        </div>
+        
+        <div>
+            <label for="pickup">Adresse de prise en charge:</label>
+            <input type="text" id="pickup" required>
+        </div>
+        
+        <div>
+            <label for="airport">Aéroport:</label>
+            <select id="airport" required>
+                <option value="">FELIX HOUPHOUËT BOIGNY</option>
+                
+            </select>
+        </div>
+        
+        <div>
+            <label for="date">Date du transport:</label>
+            <input type="date" id="date" required>
+        </div>
+        
+        <div>
+            <label for="time">Heure du transport:</label>
+            <input type="time" id="time" required>
+        </div>
+        
+        <div>
+            <label for="passengers">Nombre de passagers:</label>
+            <input type="number" id="passengers" min="1" max="8" value="1" required>
+        </div>
+        
+        
+        
+        
+        <button type="submit">Réserver</button>
+    </form>
+    
+    <div id="successMessage" class="success-message">
+        Votre réservation a été enregistrée avec succès!
+    </div>
+    
+    
+
+    <!-- Firebase SDK -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-firestore-compat.min.js"></script>
+
+    <script>
+        // Initialiser Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCGsq9aN-DKPuzsoBFAgEdfNfrzb-__RRo",
+            authDomain: "jardo-26efc.firebaseapp.com",
+            projectId: "jardo-26efc",
+            storageBucket: "jardo-26efc.firebasestorage.app",
+            messagingSenderId: "1062237964287",
+            appId: "1:1062237964287:web:fef58a549cd08d6c0a89ca",
+            measurementId: "G-4DB71EL12P"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Demander la permission des notifications
+        if ("Notification" in window && Notification.permission !== "granted") {
+            Notification.requestPermission();
+        }
+
+        // Soumission du formulaire
+        document.getElementById('reservationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const pickup = document.getElementById('pickup').value;
+            const airport = document.getElementById('airport').value;
+            const date = document.getElementById('date').value;
+            const time = document.getElementById('time').value;
+            const passengers = document.getElementById('passengers').value;
+            const luggage = document.getElementById('luggage').value;
+            const comments = document.getElementById('comments').value;
+
+            const reservation = {
+                name,
+                email,
+                phone,
+                pickup,
+                airport,
+                dateTime: `${date} ${time}`,
+                passengers: Number(passengers),
+                luggage: Number(luggage),
+                comments,
+                createdAt: new Date()
+            };
+
+            // Envoyer vers WhatsApp
+            const whatsappMessage = `Nouvelle réservation:\n
+Nom: ${name}
+Email: ${email}
+Téléphone: ${phone}
+Adresse de prise en charge: ${pickup}
+Aéroport: ${airport}
+Date et heure: ${date} ${time}
+Passagers: ${passengers}
+Bagages: ${luggage}
+Commentaires: ${comments}`;
+            const whatsappURL = `https://wa.me/2250172369840?text=${encodeURIComponent(whatsappMessage)}`;
+            window.open(whatsappURL, '_blank');
+
+            // Enregistrer dans Firebase
+            db.collection('reservations').add(reservation)
+                .then(() => {
+                    document.getElementById('successMessage').style.display = 'block';
+                    document.getElementById('reservationForm').reset();
+
+                    // Cacher le message après 3 secondes
+                    setTimeout(() => {
+                        document.getElementById('successMessage').style.display = 'none';
+                    }, 3000);
+
+                    // Notification après 1 minute
+                    setTimeout(() => {
+                        if (Notification.permission === "granted") {
+                            new Notification("Merci pour votre réservation ! 🚖");
+                        }
+                    }, 60000);
+                })
+                .catch((error) => {
+                    console.error("Erreur lors de l'ajout du document: ", error);
+                    alert("Une erreur s'est produite lors de l'enregistrement de votre réservation.");
+                });
+        });
+    </script>
+</body>
+</html>
