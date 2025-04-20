@@ -390,6 +390,85 @@
             background-color: #777;
         }
         
+        /* Map Selection Modal */
+        .map-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            overflow-y: auto;
+        }
+
+        .map-modal-content {
+            background-color: white;
+            margin: 2% auto;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 800px;
+            width: 90%;
+            position: relative;
+        }
+
+        #destination-map {
+            height: 400px;
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .distance-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .price-info {
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
+        .confirm-trip-button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .confirm-trip-button:hover {
+            background-color: #218838;
+        }
+
+        .cancel-trip-button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .cancel-trip-button:hover {
+            background-color: #c82333;
+        }
+        
         /* Media Queries for Responsive Design */
         @media screen and (max-width: 768px) {
             .header h1 {
@@ -623,6 +702,23 @@
         </div>
     </div>
     
+    <!-- Destination Selection Modal -->
+    <div id="destination-modal" class="map-modal">
+        <div class="map-modal-content">
+            <span class="close-button" onclick="closeDestinationModal()">&times;</span>
+            <h2>Sélectionnez votre destination</h2>
+            <div id="destination-map"></div>
+            <div class="distance-info" id="distance-info">
+                Distance: en attente de sélection...
+            </div>
+            <div class="price-info" id="price-info">
+                Prix estimé: en attente de sélection...
+            </div>
+            <button class="confirm-trip-button" onclick="confirmTrip()" style="display: none;">Confirmer la course</button>
+            <button class="cancel-trip-button" onclick="closeDestinationModal()">Annuler</button>
+        </div>
+    </div>
+    
     <!-- Footer -->
     <div class="footer">
         <p>&copy; 2025 Eden Taxi Moto. Tous droits réservés.</p>
@@ -665,11 +761,17 @@
         // Variables pour la carte
         let map = null;
         let userMarker = null;
+        let destinationMap = null;
+        let destinationMarker = null;
+        let routingControl = null;
+        let selectedDistance = 0;
+        let selectedPrice = 0;
+        let destinationCoords = null;
         
         // Event listeners
         locationButton.addEventListener('click', getLocation);
         registerButton.addEventListener('click', handleRegistration);
-        orderTaxiButton.addEventListener('click', orderTaxi);
+        orderTaxiButton.addEventListener('click', openDestinationModal);
         
         // Initialiser la carte avec un placeholder
         initMapPlaceholder();
@@ -787,221 +889,3 @@
         }
         
         // Ajout d'écouteurs d'événements pour les champs input
-        document.getElementById('user-name').addEventListener('input', checkFormCompletion);
-        document.getElementById('user-firstname').addEventListener('input', checkFormCompletion);
-        document.getElementById('user-phone').addEventListener('input', checkFormCompletion);
-        
-        function handleRegistration() {
-            // Récupérer les valeurs du formulaire
-            userData.name = document.getElementById('user-name').value;
-            userData.firstname = document.getElementById('user-firstname').value;
-            userData.phone = document.getElementById('user-phone').value;
-            
-            // Sauvegarder l'utilisateur dans Firebase
-            const userId = 'user_' + new Date().getTime();
-            database.ref('users/' + userId).set({
-                name: userData.name,
-                firstname: userData.firstname,
-                phone: userData.phone,
-                location: userData.location,
-                registeredAt: firebase.database.ServerValue.TIMESTAMP
-            });
-            
-            // Sauvegarder les données utilisateur dans localStorage
-            localStorage.setItem('edenTaxiUser', JSON.stringify(userData));
-            
-            // Masquer le formulaire d'inscription et afficher le chatbot
-            registrationSection.style.display = 'none';
-            chatbotSection.style.display = 'block';
-            
-            // Initialiser le chatbot
-            initChatbot();
-        }
-        
-        function initChatbot() {
-            addBotMessage(`👋 Bonjour ${userData.firstname} ! Bienvenue sur Eden Taxi Moto.`);
-            addBotMessage("Pour commander un taxi, cliquez sur le bouton ci-dessous.");
-        }
-        
-        function orderTaxi() {
-            // Générer un ID unique pour la requête
-            const requestId = 'request_' + new Date().getTime();
-            
-            // Sauvegarder la demande dans Firebase dans un format qui sera utile pour les fournisseurs
-            database.ref('requests/' + requestId).set({
-                name: userData.name,
-                firstname: userData.firstname,
-                phone: userData.phone,
-                location: userData.location,
-                status: 'pending',  // les états possibles sont: 'pending', 'accepted', 'completed', 'canceled'
-                timestamp: firebase.database.ServerValue.TIMESTAMP,
-                assignedTo: null,   // ID du fournisseur qui accepte la commande
-                pickupAddress: 'Votre position actuelle', // À améliorer avec géocodage inverse
-                isAvailable: true   // important: indique que cette commande est disponible pour les fournisseurs
-            });
-            
-            addUserMessage("Je souhaite commander un taxi maintenant");
-            addBotMessage("✅ Votre demande a été enregistrée ! Un chauffeur vous contactera très prochainement au " + userData.phone + ".");
-            
-            // Ajouter une animation sur la carte pour montrer que la recherche est en cours
-            if (map && userMarker) {
-                // Faire pulser le marqueur de l'utilisateur
-                userMarker.bindPopup('Recherche de taxi en cours...').openPopup();
-            }
-            
-            // Désactiver temporairement le bouton pour éviter les commandes multiples
-            orderTaxiButton.disabled = true;
-            orderTaxiButton.textContent = "Demande en cours...";
-            
-            // Réactiver le bouton après 30 secondes
-            setTimeout(() => {
-                orderTaxiButton.disabled = false;
-                orderTaxiButton.textContent = "Commander un taxi";
-            }, 30000);
-            
-            // Écouter les mises à jour de la commande
-            database.ref('requests/' + requestId).on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    // Si la commande est acceptée par un chauffeur
-                    if (data.status === 'accepted' && data.assignedTo) {
-                        addBotMessage("🏍️ Bonne nouvelle ! Un chauffeur a accepté votre course et sera chez vous dans environ " + 
-                                      (data.estimatedTime || "5") + " minutes.");
-                        
-                        // Simuler l'arrivée d'un taxi sur la carte
-                        if (map && userData.location) {
-                            // Créer un marqueur qui se déplace vers l'utilisateur
-                            const lat = userData.location.latitude;
-                            const lng = userData.location.longitude;
-                            const startLat = lat + 0.01;
-                            const startLng = lng + 0.01;
-                            
-                            const taxiIcon = L.divIcon({
-                                html: '🏍️',
-                                className: 'assigned-taxi',
-                                iconSize: [40, 40]
-                            });
-                            
-                            const movingTaxi = L.marker([startLat, startLng], {icon: taxiIcon}).addTo(map)
-                                .bindPopup('Votre taxi arrive !');
-                        }
-                    }
-                }
-            });
-        }
-        
-        function addBotMessage(message) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message bot-message';
-            messageDiv.textContent = message;
-            chatMessagesClient.appendChild(messageDiv);
-            chatMessagesClient.scrollTop = chatMessagesClient.scrollHeight;
-        }
-        
-        function addUserMessage(message) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message user-message';
-            messageDiv.textContent = message;
-            chatMessagesClient.appendChild(messageDiv);
-            chatMessagesClient.scrollTop = chatMessagesClient.scrollHeight;
-        }
-        
-        function showSection(sectionId) {
-            if (sectionId === 'home') {
-                window.location.href = 'eden.html';
-            }
-        }
-        
-        function showModal(modalId) {
-            document.getElementById(modalId).style.display = 'block';
-        }
-        
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-        // Vérifier si l'utilisateur est déjà inscrit au chargement de la page
-window.addEventListener('DOMContentLoaded', checkExistingUser);
-
-function checkExistingUser() {
-    // Récupérer les données utilisateur depuis le localStorage
-    const savedUser = localStorage.getItem('edenTaxiUser');
-    
-    if (savedUser) {
-        // Restaurer les données
-        userData = JSON.parse(savedUser);
-        
-        // Masquer le formulaire d'inscription et afficher le chatbot
-        registrationSection.style.display = 'none';
-        chatbotSection.style.display = 'block';
-        
-        // Initialiser le chatbot
-        initChatbot();
-        
-        // Initialiser la carte avec la position sauvegardée
-        if (userData.location) {
-            initMap(userData.location.latitude, userData.location.longitude);
-        } else {
-            initMapPlaceholder();
-        }
-    }
-}
-
-// Modifier la fonction handleRegistration pour sauvegarder les données dans localStorage
-function handleRegistration() {
-    // Récupérer les valeurs du formulaire
-    userData.name = document.getElementById('user-name').value;
-    userData.firstname = document.getElementById('user-firstname').value;
-    userData.phone = document.getElementById('user-phone').value;
-    
-    // Sauvegarder l'utilisateur dans Firebase
-    const userId = 'user_' + new Date().getTime();
-    database.ref('users/' + userId).set({
-        name: userData.name,
-        firstname: userData.firstname,
-        phone: userData.phone,
-        location: userData.location,
-        registeredAt: firebase.database.ServerValue.TIMESTAMP
-    });
-    
-    // Sauvegarder les données utilisateur dans localStorage
-    localStorage.setItem('edenTaxiUser', JSON.stringify(userData));
-    
-    // Masquer le formulaire d'inscription et afficher le chatbot
-    registrationSection.style.display = 'none';
-    chatbotSection.style.display = 'block';
-    
-    // Initialiser le chatbot
-    initChatbot();
-}
-
-// Ajouter une fonction pour se déconnecter (à utiliser si besoin)
-function logout() {
-    // Supprimer les données du localStorage
-    localStorage.removeItem('edenTaxiUser');
-    
-    // Réinitialiser les données utilisateur
-    userData = {
-        name: '',
-        firstname: '',
-        phone: '',
-        location: null
-    };
-    
-    // Afficher le formulaire d'inscription et masquer le chatbot
-    registrationSection.style.display = 'block';
-    chatbotSection.style.display = 'none';
-    
-    // Réinitialiser la carte
-    initMapPlaceholder();
-}
-        
-        // Close modal when clicking outside of it
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.style.display = 'none';
-            }
-        }
-        
-    </script>
-</body>
-</html>
