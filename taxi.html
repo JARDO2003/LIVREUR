@@ -3,55 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eden Taxi Moto - Client</title>
+    <title>Eden Taxi Moto</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-app-compat.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-database-compat.min.js"></script>
+    <!-- Ajout des ressources Leaflet -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
             background-color: #f5f5f5;
+            color: #333;
+            background-image: url('image/taxi moto.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
         }
+        
         .header {
             background-color: #222;
             color: white;
-            padding: 15px 0;
+            padding: 12px 0;
             text-align: center;
+            position: relative;
+            width: 100%;
         }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            margin: 0;
+        }
+        
+        .nav-menu {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            background-color: #333;
+            padding: 10px 0;
+            width: 100%;
+        }
+        
+        .nav-button {
+            background-color: #555;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .nav-button:hover {
+            background-color: #777;
+            transform: translateY(-2px);
+        }
+        
         .container {
-            max-width: 600px;
+            width: 100%;
+            max-width: 1000px;
             margin: 20px auto;
-            padding: 20px;
+            padding: 0 15px;
+        }
+        
+        .section {
             background-color: white;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 30px;
+            width: 100%;
         }
+        
+        .section-title {
+            color: #0084ff;
+            border-bottom: 2px solid #423b3b;
+            padding-bottom: 10px;
+            margin-top: 0;
+            font-size: 1.5rem;
+        }
+        
+        /* ChatBot Section */
         .chatbot {
-            border: 1px solid #ddd;
+            border: 1px solid #ebe8e8;
             border-radius: 10px;
             padding: 15px;
             height: 400px;
             display: flex;
             flex-direction: column;
+            width: 100%;
         }
+        
+        .chat-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f0eded;
+        }
+
+        .chatbot-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 15px;
+            object-fit: cover;
+        }
+
+        .chatbot-info {
+            flex: 1;
+        }
+
+        .chatbot-name {
+            font-weight: bold;
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .chatbot-status {
+            color: #28a745;
+            font-size: 0.8rem;
+            margin: 0;
+        }
+        
         .chat-messages {
             flex: 1;
             overflow-y: auto;
             padding: 10px;
+            width: 100%;
         }
+        
         .message {
             margin-bottom: 15px;
             padding: 10px;
             border-radius: 15px;
-            max-width: 80%;
+            max-width: 85%;
             word-wrap: break-word;
+            font-size: 0.95rem;
         }
+        
         .bot-message {
             background-color: #f1f0f0;
             align-self: flex-start;
             border-bottom-left-radius: 5px;
         }
+        
         .user-message {
             background-color: #0084ff;
             color: white;
@@ -59,330 +166,726 @@
             margin-left: auto;
             border-bottom-right-radius: 5px;
         }
-        .message-options {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .option-button {
-            background-color: #f1f0f0;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: 600;  /* Increased font weight for better visibility */
-            text-align: left;
-            transition: background-color 0.3s;
-            font-size: 16px;   /* Increased font size */
-            animation: pulse 1.5s infinite;  /* Pulsing animation */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            border: 2px solid transparent;
-        }
-        .option-button:hover {
-            background-color: #e0e0e0;
-            animation: none;
-            border-color: #0084ff;
-        }
         
-        /* Pulsing animation */
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            }
-            50% {
-                transform: scale(1.03);
-                box-shadow: 0 5px 15px rgba(0,0,150,0.2);
-                background-color: #e8f1ff;
-            }
-            100% {
-                transform: scale(1);
-                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            }
-        }
-        
-        .input-group {
-            margin-top: 15px;
-            display: flex;
-            gap: 10px;
-        }
-        input[type="text"] {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            outline: none;
-            font-size: 16px;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #0084ff;
+        .order-button {
+            background-color: #ff6b00;
+            padding: 12px 20px;
+            font-size: 1rem;
+            width: 100%;
             color: white;
             border: none;
-            border-radius: 20px;
+            border-radius: 10px;
             cursor: pointer;
             font-weight: 600;
+            animation: orderPulse 2s infinite;
             transition: all 0.3s;
         }
-        button:hover {
-            background-color: #0073e6;
+        
+        .order-button:hover {
+            background-color: #e65c00;
             transform: translateY(-2px);
         }
         
-        /* Special button for location sharing */
-        .location-button {
-            background-color: #28a745;
-            color: white;
-            animation: locationPulse 2s infinite;
-        }
-        
-        @keyframes locationPulse {
+        @keyframes orderPulse {
             0% {
-                background-color: #28a745;
+                background-color: #ff6b00;
             }
             50% {
-                background-color: #1e7e34;
-                box-shadow: 0 0 15px rgba(40, 167, 69, 0.5);
+                background-color: #e65c00;
+                box-shadow: 0 0 15px rgba(255, 107, 0, 0.5);
             }
             100% {
-                background-color: #28a745;
+                background-color: #ff6b00;
             }
         }
+        
+        /* Services Section */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+        
+        .service-card {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+            border: 1px solid #eee;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .service-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+            color: #0084ff;
+        }
+        
+        /* Map Section */
+        .map-container {
+            height: 350px;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .map-placeholder {
+            width: 100%;
+            height: 100%;
+            background-color: #e9e9e9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            color: #777;
+            text-align: center;
+            padding: 10px;
+        }
+        
+        /* Testimonials Section */
+        .testimonials {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+        
+        .testimonial-card {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            border-left: 4px solid #0084ff;
+        }
+        
+        .testimonial-text {
+            font-style: italic;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .testimonial-author {
+            font-weight: bold;
+            text-align: right;
+            font-size: 0.9rem;
+        }
+        
+        /* Registration Form */
+        #registration-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            width: 100%;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        
+        input[type="text"], 
+        input[type="tel"] {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            width: 100%;
+        }
+        
+        .form-button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+            width: 100%;
+        }
+        
+        .form-button:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            overflow-y: auto;
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close-button:hover {
+            color: #000;
+        }
+        
+        /* Footer */
+        .footer {
+            background-color: #222;
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 40px;
+            width: 100%;
+        }
+        
+        /* Partner Access Button */
+        .partner-button {
+            background-color: #555;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .partner-button:hover {
+            background-color: #777;
+        }
+        
+        /* Map Selection Modal */
+        .map-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            overflow-y: auto;
+        }
+
+        .map-modal-content {
+            background-color: white;
+            margin: 2% auto;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 800px;
+            width: 90%;
+            position: relative;
+        }
+
+        #destination-map {
+            height: 400px;
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .distance-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .price-info {
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
+        .confirm-trip-button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .confirm-trip-button:hover {
+            background-color: #218838;
+        }
+
+        .cancel-trip-button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .cancel-trip-button:hover {
+            background-color: #c82333;
+        }
+        
+        /* Media Queries for Responsive Design */
+        @media screen and (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .nav-menu {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .nav-button {
+                width: 90%;
+                margin: 3px auto;
+            }
+            
+            .partner-button {
+                width: 90%;
+                margin: 3px auto;
+            }
+            
+            .section {
+                padding: 15px;
+            }
+            
+            .section-title {
+                font-size: 1.3rem;
+            }
+            
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .testimonials {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                margin: 20% auto;
+                width: 95%;
+                padding: 15px;
+            }
+            
+            .chatbot {
+                height: 350px;
+            }
+        }
+        
+        @media screen and (max-width: 480px) {
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            
+            .chatbot {
+                height: 300px;
+                padding: 10px;
+            }
+            
+            .message {
+                padding: 8px;
+                font-size: 0.9rem;
+            }
+            
+            .map-container {
+                height: 250px;
+            }
+            
+            .order-button {
+                font-size: 0.9rem;
+                padding: 10px;
+            }
+            
+            .form-button {
+                font-size: 0.9rem;
+                padding: 10px;
+            }
+            
+            input[type="text"], 
+            input[type="tel"] {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+            
+            .service-icon {
+                font-size: 30px;
+            }
+        }
+        
     </style>
 </head>
 <body>
+    <!-- Header -->
     <div class="header">
         <h1>Eden Taxi Moto</h1>
     </div>
     
+    <!-- Navigation Menu -->
+    <div class="nav-menu">
+        <button class="nav-button" onclick="showSection('home')">Accueil</button>
+        <button class="nav-button" onclick="showModal('about-modal')">À propos</button>
+        <button class="nav-button" onclick="showModal('contact-modal')">Contact</button>
+        <button class="partner-button" onclick="prompt('Chers partenaire veillez entré le mot de passe...Marcio') === 'marcio2003' && (window.location='fournisseur.html') || alert('Mot de passe incorrect')">Accès Partenaire</button>
+    </div>
+    
     <div class="container">
-        <div class="chatbot">
-            <div class="chat-messages" id="chat-messages-client">
-                <!-- Messages will be added here dynamically -->
-            </div>
-            <div class="input-group">
-                <input type="text" id="user-input" placeholder="Tapez votre message..." disabled>
-                <button onclick="sendMessage()" id="send-button" disabled>Envoyer</button>
+        <!-- Registration Section -->
+        <div class="section" id="registration-section">
+            <h2 class="section-title">Inscription</h2>
+            <form id="registration-form">
+                <div class="form-group">
+                    <label for="user-name">Nom</label>
+                    <input type="text" id="user-name" placeholder="Votre nom" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="user-firstname">Prénom</label>
+                    <input type="text" id="user-firstname" placeholder="Votre prénom" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="user-phone">Numéro de téléphone</label>
+                    <input type="tel" id="user-phone" placeholder="Votre numéro de téléphone" required>
+                </div>
+                
+                <div class="form-group">
+                    <button type="button" id="location-button" class="form-button">Activer la localisation</button>
+                    <span id="location-status">Localisation: Non activée</span>
+                </div>
+                
+                <button type="button" id="register-button" class="form-button" disabled>S'inscrire</button>
+            </form>
+        </div>
+        
+        <!-- ChatBot Section -->
+        <div class="section" id="chatbot-section" style="display: none;">
+            <h2 class="section-title">Commander un Taxi</h2>
+            <div class="chatbot">
+                <div class="chat-header">
+                    <img src="image/robot.jpg" alt="Eden Assistant" class="chatbot-avatar">
+                    <div class="chatbot-info">
+                        <p class="chatbot-name">Eden Assistant</p>
+                        <p class="chatbot-status">En ligne</p>
+                    </div>
+                </div>
+                <div class="chat-messages" id="chat-messages-client">
+                    <!-- Messages will be added here dynamically -->
+                </div>
+                <div style="margin-top: 15px;">
+                    <button class="order-button" id="order-taxi-button">Commander un taxi maintenant</button>
+                </div>
             </div>
         </div>
+        
+        <!-- Services Section -->
+        <div class="section">
+            <h2 class="section-title">Autres Services</h2>
+            <div class="services-grid">
+                <a href="aeroport.html" style="text-decoration: none; color: inherit;">
+                <div class="service-card">
+                    <div class="service-icon">🏢</div>
+                    <h3>Transport vers Aéroport</h3>
+                    <p>Service rapide et ponctuel vers tous les aéroports</p>
+                </div>
+                <a href="eden.html" style="text-decoration: none; color: inherit;">
+                <div class="service-card">
+                    <div class="service-icon">📦</div>
+                    <h3>Livraison Express</h3>
+                    <p>Livraison de colis dans toute la ville</p>
+                </div>
+                <a href="chat.html" style="text-decoration: none; color: inherit;">
+                    <div class="service-card">
+                        <div class="service-icon">🤖</div>
+                        <h3>MarcioAI</h3>
+                        <p>Votre dictionnaire artificielle</p>
+                    </div>
+                </a>
+                
+            </div>
+        </div>
+        
+        <!-- Map Section -->
+        <div class="section">
+            <h2 class="section-title">Carte de la Ville</h2>
+            <div class="map-container">
+                <div id="map">
+                    <div class="map-placeholder">
+                        Carte de la ville - Chargement...
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Testimonials Section -->
+        <div class="section">
+            <h2 class="section-title">Avis Clients</h2>
+            <div class="testimonials">
+                <div class="testimonial-card">
+                    <p class="testimonial-text">"Service rapide et professionnel. Le chauffeur est arrivé à l'heure et m'a conduit en toute sécurité à ma destination."</p>
+                    <p class="testimonial-author">- Marie L.</p>
+                </div>
+                <div class="testimonial-card">
+                    <p class="testimonial-text">"Application facile à utiliser. J'ai commandé un taxi et en moins de 5 minutes, il était à ma porte. Impressionnant !"</p>
+                    <p class="testimonial-author">- Thomas B.</p>
+                </div>
+                <div class="testimonial-card">
+                    <p class="testimonial-text">"Excellent service pour éviter les embouteillages. Le chauffeur connaissait des raccourcis efficaces."</p>
+                    <p class="testimonial-author">- Sophia M.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal About -->
+    <div id="about-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('about-modal')">&times;</span>
+            <h2>À propos d'Eden Taxi Moto</h2>
+            <p>Eden Taxi Moto est un service de transport à moto professionnel opérant dans toute la ville. Notre flotte de motos et nos chauffeurs expérimentés vous garantissent un service rapide, sécurisé et fiable.</p>
+            <p>Nous proposons des services de transport de personnes, de livraison de colis et de transport vers les aéroports.</p>
+        </div>
+    </div>
+    
+    <!-- Modal Contact -->
+    <div id="contact-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('contact-modal')">&times;</span>
+            <h2>Contactez-nous</h2>
+            <p><strong>Téléphone:</strong> 0172369840</p>
+            <p><strong>Email:</strong> zinzindohouemarcio@gmail.com</p>
+            <p><strong>Adresse:</strong> 123 Avenue des TRAORE</p>
+        </div>
+    </div>
+    
+    <!-- Destination Selection Modal -->
+    <div id="destination-modal" class="map-modal">
+        <div class="map-modal-content">
+            <span class="close-button" onclick="closeDestinationModal()">&times;</span>
+            <h2>Sélectionnez votre destination</h2>
+            <div id="destination-map"></div>
+            <div class="distance-info" id="distance-info">
+                Distance: en attente de sélection...
+            </div>
+            <div class="price-info" id="price-info">
+                Prix estimé: en attente de sélection...
+            </div>
+            <button class="confirm-trip-button" onclick="confirmTrip()" style="display: none;">Confirmer la course</button>
+            <button class="cancel-trip-button" onclick="closeDestinationModal()">Annuler</button>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer">
+        <p>&copy; 2025 Eden Taxi Moto. Tous droits réservés.</p>
     </div>
 
     <script>
         // Initialize Firebase
         const firebaseConfig = {
-            apiKey: "AIzaSyBSPNvZqwX31r2b9GqyyxTmfjXGpNmAvzI",
-            authDomain: "marcius-82e4c.firebaseapp.com",
-            databaseURL: "https://marcius-82e4c-default-rtdb.firebaseio.com",
-            projectId: "marcius-82e4c",
-            storageBucket: "marcius-82e4c.firebasestorage.app",
-            messagingSenderId: "345743987757",
-            appId: "1:345743987757:web:cb6941f795ff99ad8e54a4",
-            measurementId: "G-K6S4BKPR10"
+            apiKey: "AIzaSyC1pJG97RoIJL-zvrRP5OaJAIVkFNoMC1Q",
+            authDomain: "livreur-21be8.firebaseapp.com",
+            databaseURL: "https://livreur-21be8-default-rtdb.firebaseio.com",
+            projectId: "livreur-21be8",
+            storageBucket: "livreur-21be8.firebasestorage.app",
+            messagingSenderId: "330461481415",
+            appId: "1:330461481415:web:3c9987401062181f9731e2",
+            measurementId: "G-1KWC1NCJ45"
         };
         
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Chat state
-        let chatState = {
-            step: 'welcome',
-            customerPhone: null,
-            customerLocation: null,
-            requestId: null
+        // User data
+        let userData = {
+            name: '',
+            firstname: '',
+            phone: '',
+            location: null
         };
 
         // DOM elements
+        const registrationSection = document.getElementById('registration-section');
+        const chatbotSection = document.getElementById('chatbot-section');
         const chatMessagesClient = document.getElementById('chat-messages-client');
-        const userInput = document.getElementById('user-input');
-        const sendButton = document.getElementById('send-button');
-
-        // Initialize chatbot when page loads
-        window.onload = function() {
-            startChat();
-        };
-
-        function startChat() {
-            addBotMessage("👋 Bienvenue chez Eden Taxi Moto ! Comment puis-je vous aider aujourd'hui ?");
+        const registerButton = document.getElementById('register-button');
+        const locationButton = document.getElementById('location-button');
+        const locationStatus = document.getElementById('location-status');
+        const orderTaxiButton = document.getElementById('order-taxi-button');
+        const mapElement = document.getElementById('map');
+        
+        // Variables pour la carte
+        let map = null;
+        let userMarker = null;
+        let destinationMap = null;
+        let destinationMarker = null;
+        let routingControl = null;
+        let selectedDistance = 0;
+        let selectedPrice = 0;
+        let destinationCoords = null;
+        
+        // Event listeners
+        locationButton.addEventListener('click', getLocation);
+        registerButton.addEventListener('click', handleRegistration);
+        orderTaxiButton.addEventListener('click', openDestinationModal);
+        
+        // Initialiser la carte avec un placeholder
+        initMapPlaceholder();
+        
+        function initMapPlaceholder() {
+            mapElement.innerHTML = `
+                <div class="map-placeholder">
+                    <div style="text-align: center;">
+                        <div style="font-size: 50px; margin-bottom: 20px;">🗺️</div>
+                        <p>Activez la localisation pour afficher la carte</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Initialiser la carte avec Leaflet
+        function initMap(latitude, longitude) {
+            // Effacer le contenu actuel
+            mapElement.innerHTML = '';
             
-            // Add options with a slight delay for better UX
+            // Créer la carte centrée sur la position de l'utilisateur
+            map = L.map('map').setView([latitude, longitude], 14);
+            
+            // Ajouter une couche de carte (OpenStreetMap)
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // Ajouter un marqueur pour la position de l'utilisateur
+            userMarker = L.marker([latitude, longitude]).addTo(map)
+                .bindPopup('Votre position actuelle')
+                .openPopup();
+            
+            // Ajouter quelques marqueurs fictifs pour les taxis disponibles dans un rayon de 2km
+            addFakeTaxiMarkers(latitude, longitude, 5);
+            
+            // Ajouter un cercle pour représenter la zone de service
+            L.circle([latitude, longitude], {
+                color: '#0084ff',
+                fillColor: '#0084ff',
+                fillOpacity: 0.1,
+                radius: 3000 // rayon en mètres (3km)
+            }).addTo(map);
+            
+            // Recalculer la taille de la carte après l'initialisation
             setTimeout(() => {
-                // Add options
-                const optionsDiv = document.createElement('div');
-                optionsDiv.className = 'message-options';
-                
-                const orderButton = document.createElement('button');
-                orderButton.className = 'option-button';
-                orderButton.textContent = "🏍️ Commander un taxi moto";
-                orderButton.onclick = function() {
-                    handleOption('order');
-                };
-                
-                const contactButton = document.createElement('button');
-                contactButton.className = 'option-button';
-                contactButton.textContent = "📞 Joindre Eden Service";
-                contactButton.onclick = function() {
-                    handleOption('contact');
-                };
-                
-                optionsDiv.appendChild(orderButton);
-                optionsDiv.appendChild(contactButton);
-                chatMessagesClient.appendChild(optionsDiv);
-                
-                // Scroll to the bottom to show the options
-                chatMessagesClient.scrollTop = chatMessagesClient.scrollHeight;
-            }, 500);
+                map.invalidateSize();
+            }, 100);
         }
-
-        function handleOption(option) {
-            // Remove previous options
-            const previousOptions = document.querySelectorAll('.message-options');
-            previousOptions.forEach(element => {
-                element.remove();
+        
+        function addFakeTaxiMarkers(lat, lng, count) {
+            // Icône personnalisée pour les taxis
+            const taxiIcon = L.divIcon({
+                html: '🏍️',
+                className: 'taxi-icon',
+                iconSize: [30, 30]
             });
-
-            if (option === 'order') {
-                addUserMessage("Je souhaite commander un taxi moto");
-                chatState.step = 'askPhone';
-                addBotMessage("Excellent ! Pour traiter votre demande, pourriez-vous me communiquer votre numéro de téléphone ?");
-                userInput.disabled = false;
-                sendButton.disabled = false;
-                userInput.focus();
-            } else if (option === 'contact') {
-                addUserMessage("Je souhaite joindre Eden Service");
-                addBotMessage("Vous pouvez joindre notre service client au 01 23 45 67 89 ou par email à contact@eden-taxi-moto.com");
-            } else if (option === 'shareLocation') {
-                addUserMessage("Partager ma localisation");
-                getLocation();
+            
+            // Ajouter des marqueurs fictifs pour les motos-taxis disponibles
+            for (let i = 0; i < count; i++) {
+                // Générer des positions aléatoires dans un rayon de 2km
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 0.02; // ~2km en degrés approximativement
+                const newLat = lat + distance * Math.cos(angle);
+                const newLng = lng + distance * Math.sin(angle);
+                
+                L.marker([newLat, newLng], {icon: taxiIcon}).addTo(map)
+                    .bindPopup('Moto-taxi disponible');
             }
         }
-
-        function sendMessage() {
-            const message = userInput.value.trim();
-            if (message === '') return;
-
-            addUserMessage(message);
-            userInput.value = '';
-
-            processUserInput(message);
-        }
-
-        function processUserInput(message) {
-            if (chatState.step === 'askPhone') {
-                // Validate phone number (simple validation for demo)
-                if (message.length >= 8 && !isNaN(message)) {
-                    chatState.customerPhone = message;
-                    addBotMessage("Merci ! Pour vous envoyer un taxi, nous avons besoin de connaître votre position.");
-                    
-                    // Add location sharing option with a slight delay
-                    setTimeout(() => {
-                        // Add location sharing option
-                        const optionsDiv = document.createElement('div');
-                        optionsDiv.className = 'message-options';
-                        
-                        const locationButton = document.createElement('button');
-                        locationButton.className = 'option-button location-button';
-                        locationButton.textContent = "📍 Partager ma localisation";
-                        locationButton.onclick = function() {
-                            handleOption('shareLocation');
-                        };
-                        
-                        optionsDiv.appendChild(locationButton);
-                        chatMessagesClient.appendChild(optionsDiv);
-                        
-                        // Scroll to the bottom to show the location button
-                        chatMessagesClient.scrollTop = chatMessagesClient.scrollHeight;
-                    }, 500);
-                    
-                    chatState.step = 'askLocation';
-                    userInput.disabled = true;
-                    sendButton.disabled = true;
-                } else {
-                    addBotMessage("Ce numéro ne semble pas valide. Veuillez entrer un numéro de téléphone valide.");
-                }
-            }
-        }
-
+        
         function getLocation() {
             if (navigator.geolocation) {
-                addBotMessage("Récupération de votre position en cours...");
-                navigator.geolocation.getCurrentPosition(showPosition, showError);
+                locationStatus.textContent = "Localisation: En cours...";
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        userData.location = {
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                            timestamp: new Date().getTime()
+                        };
+                        locationStatus.textContent = "Localisation: Activée ✓";
+                        locationStatus.style.color = "green";
+                        locationButton.textContent = "Localisation activée ✓";
+                        locationButton.style.backgroundColor = "#28a745";
+                        
+                        // Initialiser la carte avec la position réelle
+                        initMap(position.coords.latitude, position.coords.longitude);
+                        
+                        checkFormCompletion();
+                    },
+                    (error) => {
+                        locationStatus.textContent = "Localisation: Erreur";
+                        locationStatus.style.color = "red";
+                        alert("Erreur de géolocalisation: " + error.message);
+                    }
+                );
             } else {
-                addBotMessage("La géolocalisation n'est pas prise en charge par votre navigateur.");
+                locationStatus.textContent = "Localisation: Non supportée par votre navigateur";
+                locationStatus.style.color = "red";
+                alert("La géolocalisation n'est pas prise en charge par ce navigateur.");
             }
         }
-
-        function showPosition(position) {
-            const latitude = position.coords.latitude;
-            const longitude = position.coords.longitude;
+        
+        function checkFormCompletion() {
+            const nameInput = document.getElementById('user-name');
+            const firstnameInput = document.getElementById('user-firstname');
+            const phoneInput = document.getElementById('user-phone');
             
-            chatState.customerLocation = {
-                latitude: latitude,
-                longitude: longitude,
-                timestamp: new Date().getTime()
-            };
-            
-            // Generate a unique request ID
-            chatState.requestId = 'request_' + new Date().getTime();
-            
-            // Save to Firebase
-            database.ref('requests/' + chatState.requestId).set({
-                phone: chatState.customerPhone,
-                location: chatState.customerLocation,
-                status: 'pending',
-                timestamp: firebase.database.ServerValue.TIMESTAMP
-            });
-            
-            addBotMessage("✅ Merci pour votre confiance ! Nous vous enverrons un taxi dans quelques minutes. Un chauffeur vous contactera au " + chatState.customerPhone + ".");
-            
-            // Listen for updates
-            database.ref('requests/' + chatState.requestId).on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (data && data.status === 'accepted') {
-                    addBotMessage("🏍️ Bonne nouvelle ! Un chauffeur a accepté votre course et sera chez vous dans environ " + data.estimatedTime + " minutes.");
-                }
-            });
-        }
-
-        function showError(error) {
-            switch(error.code) {
-                case error.PERMISSION_DENIED:
-                    addBotMessage("Vous avez refusé la demande de géolocalisation.");
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    addBotMessage("Les informations de localisation ne sont pas disponibles.");
-                    break;
-                case error.TIMEOUT:
-                    addBotMessage("La demande de localisation a expiré.");
-                    break;
-                case error.UNKNOWN_ERROR:
-                    addBotMessage("Une erreur inconnue s'est produite.");
-                    break;
+            if (nameInput.value && firstnameInput.value && phoneInput.value && userData.location) {
+                registerButton.disabled = false;
+            } else {
+                registerButton.disabled = true;
             }
         }
-
-        function addBotMessage(message) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message bot-message';
-            messageDiv.textContent = message;
-            chatMessagesClient.appendChild(messageDiv);
-            chatMessagesClient.scrollTop = chatMessagesClient.scrollHeight;
-        }
-
-        function addUserMessage(message) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message user-message';
-            messageDiv.textContent = message;
-            chatMessagesClient.appendChild(messageDiv);
-            chatMessagesClient.scrollTop = chatMessagesClient.scrollHeight;
-        }
-
-        // Event listener for Enter key in input field
-        userInput.addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                sendMessage();
-            }
-        });
-    </script>
-</body>
-</html>
+        
+        // Ajout d'écouteurs d'événements pour les champs input
